@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5048e5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<!-- Header / Navigation Placeholder -->
+<div class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10">
+<div class="max-w-7xl mx-auto flex items-center justify-between p-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">rocket_launch</span>
+<span class="font-bold text-xl tracking-tight">CreatorFlow</span>
+</div>
+<button class="text-primary font-semibold text-sm">Sign In</button>
+</div>
+</div>
+<!-- Hero Section -->
+<section class="px-4 py-12 md:py-20 text-center max-w-4xl mx-auto">
+<h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">Choose your creator journey</h1>
+<p class="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-2xl mx-auto">
+            Boost your visibility and grow your audience with our professional tools designed for scaling creators.
+        </p>
+<!-- Billing Toggle -->
+<div class="mt-10 flex justify-center">
+<div class="flex items-center gap-4 bg-primary/5 dark:bg-primary/10 p-1.5 rounded-xl border border-primary/10">
+<button class="px-6 py-2 rounded-lg bg-white dark:bg-primary shadow-sm text-sm font-semibold transition-all">Monthly</button>
+<button class="px-6 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:text-primary transition-all flex items-center gap-2">
+                    Annual
+                    <span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider">Save 20%</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Pricing Cards Grid -->
+<section class="max-w-7xl mx-auto px-4 pb-24">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Basic Plan -->
+<div class="bg-white dark:bg-slate-900/50 p-8 rounded-xl border border-primary/5 flex flex-col transition-transform hover:scale-[1.02]">
+<div class="mb-8">
+<h3 class="text-lg font-bold mb-2">Basic</h3>
+<p class="text-slate-500 text-sm">Perfect for hobbyists just starting out.</p>
+</div>
+<div class="mb-8">
+<span class="text-4xl font-bold">$0</span>
+<span class="text-slate-500">/mo</span>
+</div>
+<ul class="space-y-4 mb-10 flex-1">
+<li class="flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+                        Standard Profile Page
+                    </li>
+<li class="flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+                        Basic Analytics
+                    </li>
+<li class="flex items-center gap-3 text-sm text-slate-400">
+<span class="material-symbols-outlined text-slate-300 text-lg">block</span>
+                        Search Visibility
+                    </li>
+</ul>
+<button class="w-full py-3 rounded-lg border-2 border-primary/20 text-primary font-bold hover:bg-primary/5 transition-colors">Start for Free</button>
+</div>
+<!-- Pro Plan -->
+<div class="relative bg-white dark:bg-slate-900/50 p-8 rounded-xl border-2 border-primary shadow-xl shadow-primary/10 flex flex-col transition-transform hover:scale-[1.02]">
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
+                    Most Popular
+                </div>
+<div class="mb-8">
+<div class="flex items-center gap-2 mb-2">
+<h3 class="text-lg font-bold">Pro</h3>
+<span class="material-symbols-outlined text-primary text-lg filled-icon">verified</span>
+</div>
+<p class="text-slate-500 text-sm">Get discovered by brands and followers.</p>
+</div>
+<div class="mb-8">
+<span class="text-4xl font-bold">$19</span>
+<span class="text-slate-500">/mo</span>
+</div>
+<ul class="space-y-4 mb-10 flex-1">
+<li class="flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                        Everything in Basic
+                    </li>
+<li class="flex items-center gap-3 text-sm font-semibold text-primary">
+<span class="material-symbols-outlined text-primary text-lg">search</span>
+                        Appear in Search Results
+                    </li>
+<li class="flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                        Advanced Audience Insights
+                    </li>
+<li class="flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                        Custom Profile URL
+                    </li>
+</ul>
+<button class="w-full py-3 rounded-lg bg-primary text-white font-bold hover:opacity-90 transition-opacity">Go Pro Now</button>
+</div>
+<!-- Premium Plan -->
+<div class="bg-white dark:bg-slate-900/50 p-8 rounded-xl border border-primary/5 flex flex-col transition-transform hover:scale-[1.02]">
+<div class="mb-8">
+<h3 class="text-lg font-bold mb-2">Premium</h3>
+<p class="text-slate-500 text-sm">Maximum exposure for top creators.</p>
+</div>
+<div class="mb-8">
+<span class="text-4xl font-bold">$49</span>
+<span class="text-slate-500">/mo</span>
+</div>
+<ul class="space-y-4 mb-10 flex-1">
+<li class="flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+                        Everything in Pro
+                    </li>
+<li class="flex items-center gap-3 text-sm font-semibold text-primary">
+<span class="material-symbols-outlined text-primary text-lg">workspace_premium</span>
+                        Featured Listing (Top 1%)
+                    </li>
+<li class="flex items-center gap-3 text-sm font-semibold text-primary">
+<span class="material-symbols-outlined text-primary text-lg">campaign</span>
+                        Ad-free Profile for Fans
+                    </li>
+<li class="flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+                        Priority Support 24/7
+                    </li>
+</ul>
+<button class="w-full py-3 rounded-lg border-2 border-primary/20 text-primary font-bold hover:bg-primary/5 transition-colors">Get Featured</button>
+</div>
+</div>
+</section>
+<!-- Visibility Showcase Section -->
+<section class="max-w-5xl mx-auto px-4 pb-24">
+<div class="bg-primary/5 dark:bg-primary/10 rounded-3xl p-8 md:p-12 overflow-hidden relative">
+<div class="grid md:grid-cols-2 gap-12 items-center">
+<div>
+<h2 class="text-3xl font-bold mb-6">Unlock Maximum Visibility</h2>
+<p class="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                        Creators on our Pro and Premium plans see an average of 4x more engagement. Our algorithm prioritizes premium content, placing you directly in front of active explorers.
+                    </p>
+<div class="space-y-4">
+<div class="flex items-start gap-4">
+<div class="bg-primary/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">trending_up</span>
+</div>
+<div>
+<h4 class="font-bold">Growth Accelerator</h4>
+<p class="text-sm text-slate-500">Automatic placement in "Recommended Creators" feeds.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="bg-primary/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">visibility</span>
+</div>
+<div>
+<h4 class="font-bold">Search Domination</h4>
+<p class="text-sm text-slate-500">Rank at the top when fans search for your niche.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="relative">
+<div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 border border-primary/10 transform md:rotate-3">
+<div class="flex items-center gap-4 mb-6">
+<div class="size-12 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">person</span>
+</div>
+<div class="h-4 w-32 bg-primary/10 rounded-full"></div>
+</div>
+<div class="space-y-3">
+<div class="h-3 w-full bg-slate-100 dark:bg-slate-700 rounded-full"></div>
+<div class="h-3 w-full bg-slate-100 dark:bg-slate-700 rounded-full"></div>
+<div class="h-3 w-2/3 bg-slate-100 dark:bg-slate-700 rounded-full"></div>
+</div>
+<div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<div class="flex gap-2">
+<div class="size-6 rounded-full bg-primary/20"></div>
+<div class="size-6 rounded-full bg-primary/20"></div>
+</div>
+<div class="bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 rounded-full uppercase">Premium Feature</div>
+</div>
+</div>
+<!-- Decorative elements -->
+<div class="absolute -top-6 -right-6 size-24 bg-primary/20 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-6 -left-6 size-32 bg-primary/30 rounded-full blur-3xl"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Navigation Component -->
+<div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-primary/10 px-4 pb-4 pt-2 md:hidden">
+<div class="flex gap-2 justify-around max-w-md mx-auto">
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+<p class="text-[10px] font-medium uppercase tracking-wider">Home</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined text-2xl">search</span>
+<p class="text-[10px] font-medium uppercase tracking-wider">Search</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-2xl filled-icon">crown</span>
+<p class="text-[10px] font-bold uppercase tracking-wider">Plans</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined text-2xl">person</span>
+<p class="text-[10px] font-medium uppercase tracking-wider">Profile</p>
+</a>
+</div>
+</div>
+</body></html>

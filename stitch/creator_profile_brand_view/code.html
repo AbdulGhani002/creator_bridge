@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5048e5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Creator Profile - Sarah J.</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-20">
+<!-- Header Navigation -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-4 py-3">
+<div class="max-w-3xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-primary/10 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+</button>
+<h1 class="font-bold text-lg tracking-tight">Creator Profile</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-primary/10 rounded-full">
+<span class="material-symbols-outlined">share</span>
+</button>
+<button class="p-2 hover:bg-primary/10 rounded-full">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-3xl mx-auto px-4 pt-6">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center mb-8">
+<div class="relative mb-4">
+<div class="w-32 h-32 rounded-full border-4 border-white dark:border-slate-800 shadow-xl bg-cover bg-center" data-alt="Professional headshot of Sarah J. smiling outdoors" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDs6f0E48e7vkom2ctw4-aZt7p2qHvxZSh74JN-12r_X5Srqhw0NeTNjWal1mV2YHO73BUBlH55w61xX7y0ThtIQUNOEozAqgfODtw1HlNqa8c2JC8G3DAJAU9gSnfAYdRAiHLHSKwFRRUTSi9m--PmK0aJpek70o0LBApn4WnnFdsKarTfRhkFqIIedl6Rd1lb1ncxBpehfamoh9NPc2SI-5Pjs0ZXbY0cQ6LDLl5Z8eWYELbKwVyP0E8H53HWPFLVMx2s1eW7grM')">
+</div>
+<div class="absolute bottom-1 right-1 bg-primary text-white p-1 rounded-full border-2 border-white dark:border-slate-800">
+<span class="material-symbols-outlined text-xs block">verified</span>
+</div>
+</div>
+<h2 class="text-2xl font-bold mb-1">Sarah J. | Dubai</h2>
+<div class="flex items-center gap-2 text-primary font-medium mb-1">
+<span class="material-symbols-outlined text-sm">home_work</span>
+<span>Real Estate &amp; Luxury Lifestyle</span>
+</div>
+<div class="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-sm mb-6">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span>Dubai, United Arab Emirates</span>
+</div>
+<div class="flex gap-3 w-full max-w-sm">
+<button class="flex-1 bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">mail</span>
+                    Message
+                </button>
+<button class="px-4 border border-primary/20 bg-white dark:bg-slate-800 rounded-xl hover:bg-primary/5 transition-all">
+<span class="material-symbols-outlined text-primary">bookmark</span>
+</button>
+</div>
+</section>
+<!-- Stats Grid -->
+<section class="grid grid-cols-3 gap-3 mb-8">
+<div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-primary/5 text-center shadow-sm">
+<p class="text-2xl font-bold text-primary">120k</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Instagram</p>
+</div>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-primary/5 text-center shadow-sm">
+<p class="text-2xl font-bold text-primary">40k</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">YouTube</p>
+</div>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-primary/5 text-center shadow-sm">
+<p class="text-2xl font-bold text-primary">5.2%</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Eng. Rate</p>
+</div>
+</section>
+<!-- Rate Card -->
+<section class="mb-8">
+<h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">payments</span>
+                Rate Card
+            </h3>
+<div class="bg-white dark:bg-slate-800 rounded-xl border border-primary/5 overflow-hidden shadow-sm">
+<div class="p-4 flex items-center justify-between border-b border-primary/5">
+<div>
+<p class="font-semibold">Instagram Reel</p>
+<p class="text-xs text-slate-500">60s edited video with music</p>
+</div>
+<p class="text-lg font-bold text-primary">$300</p>
+</div>
+<div class="p-4 flex items-center justify-between border-b border-primary/5">
+<div>
+<p class="font-semibold">Property Tour (Full)</p>
+<p class="text-xs text-slate-500">YouTube 10-15min walkthrough</p>
+</div>
+<p class="text-lg font-bold text-primary">$850</p>
+</div>
+<div class="p-4 flex items-center justify-between">
+<div>
+<p class="font-semibold">Story Set</p>
+<p class="text-xs text-slate-500">3x Stories with swipe-up</p>
+</div>
+<p class="text-lg font-bold text-primary">$150</p>
+</div>
+</div>
+</section>
+<!-- Portfolio Gallery -->
+<section class="mb-8">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">photo_library</span>
+                    Recent Collaborations
+                </h3>
+<button class="text-primary text-sm font-semibold">View All</button>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="aspect-square rounded-xl bg-cover bg-center shadow-inner overflow-hidden group relative" data-alt="Luxury villa exterior with swimming pool in Dubai" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAB105DpMlDqbwSPhLFQ1KMU0u3qVU8a3yWCERnuyRhrbedF__rwr9h3PFLr7mLeemav7gyk8Ng2p1ToOP6EbjGTlKVK9wMsUzPXXssDG-G4MaAVh9-0lJkjKs6i8MXq4pyIb1ubTPGcl-BINE0IK2kj9U5piAk451sKLWx01mcYHeTi6HH6FpqPFqT5rGzZfGj1rdnoGtwKEoFJVkCHPpc0iB0f0Pe1Fan40Z8UwdNLWgVH_snNljn-IL9sRnmXcY5SouuRYwOznE')">
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+<p class="text-white text-xs font-medium">EMAAR Properties</p>
+</div>
+</div>
+<div class="aspect-square rounded-xl bg-cover bg-center shadow-inner overflow-hidden group relative" data-alt="Modern penthouse interior with floor-to-ceiling windows" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA9Xr1CRQCRAIMq8AwdvQoQUgJEoeJEtISE6XKmF9h_j_g1PZfxmgu5M5T8f0rr4XbTarU1NZmWsgzd-xRQH_zqE6W7by9abXrNkHoFsCsUNiiPQnAEOXcFP6fKXLCzknBtpwUg576H6HcsG5rCvkoSWUqGsxUwcvjQRVYrzEACnsYn3BlPThLvMnQn2fCNCHDN7f3w08oJRDODgPZLReW2yegKfUMWgLzUAjnJPE_Hfbo5f064D9J-Uz-vDT14xwEN9Sp7YPun4q4')">
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+<p class="text-white text-xs font-medium">Damac Living</p>
+</div>
+</div>
+<div class="aspect-square rounded-xl bg-cover bg-center shadow-inner overflow-hidden group relative" data-alt="Aerial view of Dubai Marina at sunset" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMGrvMGvxyNrraX9gMT5nzMMea9vaX_cKBoq14N7lJqSV79YB7AXU4HuhQTHfknu4ZRzJahe6V6irwxoMCYSeu8cGBOLM24aKoRWBDSU_6Gr8COCzw7MFGObnLkdeGG_jBWyftBIDVfw3BRokYCWyThNATCIv355KgdGY97pAwAZgRfYL5BPq6Hr40M1i_pHQhP7riD_zk-fm3qyMeOLaNmWt0_jzVvNe51JTWNpFJf1KbcL7vz6t2UbIZvxx-wrW_j8MIHfHBF8M')">
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+<p class="text-white text-xs font-medium">Dubai Tourism</p>
+</div>
+</div>
+<div class="aspect-square rounded-xl bg-cover bg-center shadow-inner overflow-hidden group relative" data-alt="Close up of luxury home automation panel" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBt3i0icE8JghN94edbyJ2IXKB-zHbFEgC_cNDpSO8q0gaV5BeVnm1vkTpS4Cmmt2ZI-r5GiJp_WQtV9L193n0yGCntA9hqEMSBcmotOlp8Fzsf9CQUdC0c99QEcRkEl5-pehZMmyENCu-SaSHM7ETeQdIE4V3gyJ9EN4TrbZX4NBvS07-sIJe0xw0iI2IX_LnkaOBlLmc-ZjzDAUyaJHr6s99YGHJqKkFNU34PWgBPLplj1NsRyth7Whja6sGCwC6iJ99N5TyqHDY')">
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+<p class="text-white text-xs font-medium">SmartHome Tech</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Location Map -->
+<section class="mb-8">
+<h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">map</span>
+                Base Location
+            </h3>
+<div class="w-full h-48 rounded-xl bg-slate-200 dark:bg-slate-700 relative overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Abstract map view of Dubai palm islands" data-location="Dubai" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDEVhC_KJnB6MzwNq7whlARaKmTfGMQ1V2V_FnLnsEZk8-n9ulZlZTqEBRO3B70C-SA8DYCW-tUxVvKayfW2Kn-soCF_L9b8k3R9ddkrrk_veqX2Y42Rr_vh8AsBKMyWHchpewyhl8GMm7e1nlZUNhTsFDrxRCioV4F7Ge1DwbOKvN7WoxgW_9hAbLvvujf-Ho0a117ZqK4OlOSOG5jRZu6-uypqjH3pw6p6PTU372ZAjsiltAipx01qT-kcDgFY88bXmeWtxSevL8')">
+</div>
+<div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+<div class="bg-white dark:bg-slate-800 p-3 rounded-full shadow-lg">
+<span class="material-symbols-outlined text-primary text-3xl">location_on</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-primary/10 px-6 py-2 pb-6 flex justify-between items-center z-50">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Explore</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Campaigns</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Messages</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Profile</span>
+</a>
+</nav>
+</body></html>
