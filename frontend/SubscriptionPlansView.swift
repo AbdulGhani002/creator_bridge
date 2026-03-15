@@ -84,7 +84,10 @@ struct SubscriptionPlansView: View {
                 }
             }
         )
-        .alert("Store Error", isPresented: .constant(storeManager.purchaseError != nil)) {
+        .alert("Store Error", isPresented: Binding(
+            get: { storeManager.purchaseError != nil },
+            set: { if !$0 { storeManager.purchaseError = nil } }
+        )) {
             Button("OK") { storeManager.purchaseError = nil }
         } message: {
             Text(storeManager.purchaseError ?? "")

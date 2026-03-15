@@ -60,8 +60,13 @@ struct ApplicationFormView: View {
 }
 
 struct ApplicationsListView: View {
-    @StateObject private var viewModel = ApplicationsViewModel()
-    @EnvironmentObject private var session: SessionManager
+    let session: SessionManager
+    @StateObject private var viewModel: ApplicationsViewModel
+
+    init(session: SessionManager) {
+        self.session = session
+        _viewModel = StateObject(wrappedValue: ApplicationsViewModel(apiService: session.apiService))
+    }
 
     var body: some View {
         List {

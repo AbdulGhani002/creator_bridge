@@ -18,7 +18,7 @@ struct SettingsView: View {
                     HStack {
                         Text("Current Plan")
                         Spacer()
-                        Text((session.user?.subscriptionTier ?? "Free").capitalized)
+                        Text((session.user?.subscriptionTier ?? "free").capitalized)
                             .foregroundColor(.secondary)
                     }
                     NavigationLink("Upgrade Plan", destination: SubscriptionPlansView())

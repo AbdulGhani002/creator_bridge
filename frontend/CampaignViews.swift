@@ -3,10 +3,13 @@ import SwiftUI
 // MARK: - Campaign List View
 
 struct CampaignListView: View {
-    
-    @StateObject private var viewModel = CampaignListViewModel()
+    @StateObject private var viewModel: CampaignListViewModel
     @State private var showFilterSheet = false
     @Environment(\.colorScheme) var colorScheme
+
+    init(session: SessionManager) {
+        _viewModel = StateObject(wrappedValue: CampaignListViewModel(apiService: session.apiService))
+    }
     
     var body: some View {
         NavigationStack {
@@ -177,7 +180,7 @@ struct CampaignRowView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "dollarsign.circle.fill")
                         .foregroundStyle(.green)
-                    Text("$\(campaign.budget, specifier: "%.0f")")
+                    Text(String(format: "$%.0f", campaign.budget))
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
@@ -353,7 +356,7 @@ struct CampaignDetailView: View {
                         Spacer()
                         
                         VStack(alignment: .trailing) {
-                            Text("$\(campaign.budget, specifier: "%.0f")")
+                            Text(String(format: "$%.0f", campaign.budget))
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundStyle(.green)
@@ -460,5 +463,5 @@ struct DetailRow: View {
 // MARK: - Preview
 
 #Preview {
-    CampaignListView()
+    CampaignListView(session: SessionManager())
 }

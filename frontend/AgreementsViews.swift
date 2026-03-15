@@ -1,12 +1,18 @@
 import SwiftUI
 
 struct AgreementsListView: View {
-    @StateObject private var viewModel = AgreementsViewModel()
+    let session: SessionManager
+    @StateObject private var viewModel: AgreementsViewModel
+
+    init(session: SessionManager) {
+        self.session = session
+        _viewModel = StateObject(wrappedValue: AgreementsViewModel(apiService: session.apiService))
+    }
 
     var body: some View {
         List {
             ForEach(viewModel.agreements) { agreement in
-                NavigationLink(destination: AgreementDetailView(agreement: agreement)) {
+                NavigationLink(destination: AgreementDetailView(agreement: agreement, session: session)) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(agreement.deliverables)
                             .font(.body)
@@ -16,7 +22,7 @@ struct AgreementsListView: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Text("$\(agreement.paymentAmount, specifier: "%.0f")")
+                            Text(String(format: "$%.0f", agreement.paymentAmount))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -31,8 +37,14 @@ struct AgreementsListView: View {
 
 struct AgreementDetailView: View {
     let agreement: Agreement
-    @EnvironmentObject private var session: SessionManager
-    @StateObject private var viewModel = AgreementsViewModel()
+    let session: SessionManager
+    @StateObject private var viewModel: AgreementsViewModel
+
+    init(agreement: Agreement, session: SessionManager) {
+        self.agreement = agreement
+        self.session = session
+        _viewModel = StateObject(wrappedValue: AgreementsViewModel(apiService: session.apiService))
+    }
 
     var body: some View {
         Form {
@@ -40,7 +52,7 @@ struct AgreementDetailView: View {
                 Text(agreement.deliverables)
             }
             Section("Payment") {
-                Text("$\(agreement.paymentAmount, specifier: "%.0f")")
+                Text(String(format: "$%.0f", agreement.paymentAmount))
             }
             Section("Status") {
                 Text(agreement.status.rawValue.capitalized)

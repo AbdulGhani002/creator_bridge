@@ -53,7 +53,7 @@ enum HTTPMethod: String {
 
 // MARK: - API Service
 
-class APIService {
+public class APIService {
     
     // MARK: - Properties
     
@@ -67,14 +67,11 @@ class APIService {
     
     // MARK: - Initialization
     
-    init(
+    public init(
         baseURL: String = ProcessInfo.processInfo.environment["API_BASE_URL"] ?? "http://localhost:8000",
         session: URLSession = .shared
     ) {
-        guard let url = URL(string: baseURL) else {
-            fatalError("Invalid base URL")
-        }
-        self.baseURL = url
+        self.baseURL = URL(string: baseURL) ?? URL(string: "http://localhost:8000")!
         self.session = session
         
         // Configure decoder with custom date strategy
@@ -174,7 +171,7 @@ class APIService {
     
     // MARK: - Campaign Endpoints
     
-    func createCampaign(_ campaign: CampaignCreateRequest) async throws -> GenericResponse {
+    func createCampaign(_ campaign: CampaignCreateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(
             path: "/api/v1/campaigns",
             method: .post,
@@ -224,7 +221,7 @@ class APIService {
         try await request(path: "/api/v1/campaigns/\(id)")
     }
 
-    func updateCampaign(id: String, update: CampaignUpdateRequest) async throws -> GenericResponse {
+    func updateCampaign(id: String, update: CampaignUpdateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/campaigns/\(id)", method: .put, body: update)
     }
     
@@ -303,11 +300,11 @@ class APIService {
         return response
     }
 
-    func createCreatorProfile(_ profile: CreatorProfileCreateRequest) async throws -> GenericResponse {
+    func createCreatorProfile(_ profile: CreatorProfileCreateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/creators", method: .post, body: profile)
     }
 
-    func updateCreatorProfile(id: String, update: CreatorProfileUpdateRequest) async throws -> GenericResponse {
+    func updateCreatorProfile(id: String, update: CreatorProfileUpdateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/creators/\(id)", method: .put, body: update)
     }
 
@@ -317,11 +314,11 @@ class APIService {
 
     // MARK: - Brand Endpoints
 
-    func createBrandProfile(_ profile: BrandProfileCreateRequest) async throws -> GenericResponse {
+    func createBrandProfile(_ profile: BrandProfileCreateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/brands", method: .post, body: profile)
     }
 
-    func updateBrandProfile(id: String, update: BrandProfileUpdateRequest) async throws -> GenericResponse {
+    func updateBrandProfile(id: String, update: BrandProfileUpdateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/brands/\(id)", method: .put, body: update)
     }
 
@@ -354,13 +351,13 @@ class APIService {
         try await request(path: "/api/v1/auth/me")
     }
 
-    func deleteAccount() async throws -> GenericResponse {
+    func deleteAccount() async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/auth/account", method: .delete)
     }
 
     // MARK: - Applications
 
-    func createApplication(_ payload: ApplicationCreateRequest) async throws -> GenericResponse {
+    func createApplication(_ payload: ApplicationCreateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/applications", method: .post, body: payload)
     }
 
@@ -392,14 +389,14 @@ class APIService {
         return try await request(path: path)
     }
 
-    func updateApplication(id: String, status: ApplicationStatus) async throws -> GenericResponse {
+    func updateApplication(id: String, status: ApplicationStatus) async throws -> CreatorBridgeFrontend.GenericResponse {
         let payload = ApplicationUpdateRequest(status: status)
         return try await request(path: "/api/v1/applications/\(id)", method: .put, body: payload)
     }
 
     // MARK: - Agreements
 
-    func createAgreement(_ payload: AgreementCreateRequest) async throws -> GenericResponse {
+    func createAgreement(_ payload: AgreementCreateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/agreements", method: .post, body: payload)
     }
 
@@ -431,7 +428,7 @@ class APIService {
         return try await request(path: path)
     }
 
-    func updateAgreement(id: String, update: AgreementUpdateRequest) async throws -> GenericResponse {
+    func updateAgreement(id: String, update: AgreementUpdateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         return try await request(path: "/api/v1/agreements/\(id)", method: .put, body: update)
     }
 
@@ -454,17 +451,17 @@ class APIService {
         return try await request(path: path)
     }
 
-    func sendMessage(_ payload: MessageCreateRequest) async throws -> GenericResponse {
+    func sendMessage(_ payload: MessageCreateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         return try await request(path: "/api/v1/messages", method: .post, body: payload)
     }
 
-    func markMessageRead(id: String) async throws -> GenericResponse {
+    func markMessageRead(id: String) async throws -> CreatorBridgeFrontend.GenericResponse {
         return try await request(path: "/api/v1/messages/\(id)/read", method: .put)
     }
 
     // MARK: - Reviews
 
-    func createReview(_ payload: ReviewCreateRequest) async throws -> GenericResponse {
+    func createReview(_ payload: ReviewCreateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         return try await request(path: "/api/v1/reviews", method: .post, body: payload)
     }
 
@@ -503,17 +500,17 @@ class APIService {
         try await request(path: "/api/v1/subscriptions/me")
     }
 
-    func updateSubscription(_ payload: SubscriptionUpdateRequest) async throws -> GenericResponse {
+    func updateSubscription(_ payload: SubscriptionUpdateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/subscriptions/ios", method: .post, body: payload)
     }
 
     // MARK: - Moderation
 
-    func report(_ payload: ReportCreateRequest) async throws -> GenericResponse {
+    func report(_ payload: ReportCreateRequest) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/reports", method: .post, body: payload)
     }
 
-    func blockUser(blockedId: String) async throws -> GenericResponse {
+    func blockUser(blockedId: String) async throws -> CreatorBridgeFrontend.GenericResponse {
         return try await request(path: "/api/v1/blocks", method: .post, body: BlockCreateRequest(blockedId: blockedId))
     }
 
@@ -521,14 +518,14 @@ class APIService {
         try await request(path: "/api/v1/blocks")
     }
 
-    func unblock(blockId: String) async throws -> GenericResponse {
+    func unblock(blockId: String) async throws -> CreatorBridgeFrontend.GenericResponse {
         try await request(path: "/api/v1/blocks/\(blockId)", method: .delete)
     }
     
     // MARK: - Helper Methods
     
     private func buildURL(path: String) -> URL {
-        baseURL.appendingPathComponent(path)
+        URL(string: path, relativeTo: baseURL) ?? baseURL.appendingPathComponent(path)
     }
     
     private func buildQueryPath(_ path: String, queryItems: [URLQueryItem]) -> String {

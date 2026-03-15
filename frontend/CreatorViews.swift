@@ -1,13 +1,16 @@
-﻿import SwiftUI
+import SwiftUI
 
 // MARK: - Creator Search View
 
 struct CreatorSearchView: View {
-    
-    @StateObject private var viewModel = CreatorSearchViewModel()
+    @StateObject private var viewModel: CreatorSearchViewModel
     @State private var showFilterSheet = false
     @State private var searchText = ""
-    
+
+    init(session: SessionManager) {
+        _viewModel = StateObject(wrappedValue: CreatorSearchViewModel(apiService: session.apiService))
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -47,9 +50,7 @@ struct CreatorSearchView: View {
             prompt: "Search by location"
         )
         .onChange(of: searchText) { oldValue, newValue in
-            if !newValue.isEmpty && newValue != oldValue {
-                viewModel.searchCreatorsByLocation(newValue)
-            }
+            viewModel.searchWithDebounce(location: newValue)
         }
     }
     
@@ -166,7 +167,7 @@ struct CreatorRowView: View {
                             .font(.caption)
                         
                         if let rating = creator.rating {
-                            Text("\(rating, specifier: "%.1f")")
+                            Text(String(format: "%.1f", rating))
                                 .font(.caption)
                                 .fontWeight(.medium)
                         } else {
@@ -208,7 +209,7 @@ struct CreatorRowView: View {
                         .font(.caption)
                         .foregroundStyle(.green)
                     
-                    Text("$\(creator.pricingPerPost ?? 0, specifier: "%.0f")/post")
+                    Text(String(format: "$%.0f/post", creator.pricingPerPost ?? 0))
                         .font(.caption)
                         .fontWeight(.medium)
                 }
@@ -388,7 +389,7 @@ struct CreatorDetailView: View {
                                     HStack(spacing: 4) {
                                         Image(systemName: "star.fill")
                                             .foregroundStyle(.yellow)
-                                        Text("\(rating, specifier: "%.1f")")
+                                        Text(String(format: "%.1f", rating))
                                     }
                                     .font(.subheadline)
                                     .fontWeight(.semibold)
@@ -422,13 +423,13 @@ struct CreatorDetailView: View {
                     
                     statCard(
                         title: "Pricing",
-                        value: "$\(creator.pricingPerPost ?? 0, specifier: "%.0f")",
+                        value: String(format: "$%.0f", creator.pricingPerPost ?? 0),
                         icon: "dollarsign.circle.fill"
                     )
                     
                     statCard(
                         title: "Earnings",
-                        value: "$\(creator.totalEarnings ?? 0, specifier: "%.0f")",
+                        value: String(format: "$%.0f", creator.totalEarnings ?? 0),
                         icon: "banknote.fill"
                     )
                 }
@@ -464,7 +465,7 @@ struct CreatorDetailView: View {
                         Text("Portfolio")
                             .font(.headline)
                         
-                        Link(destination: URL(string: portfolioUrl) ?? URL(fileURLWithPath: "")) {
+                        Link(destination: URL(string: portfolioUrl) ?? URL(string: "about:blank")!) {
                             HStack {
                                 Image(systemName: "link.circle.fill")
                                 Text("View Portfolio")
@@ -541,7 +542,7 @@ struct CreatorDetailView: View {
                     .fontWeight(.semibold)
                 
                 if let engagement = platform.engagementRate {
-                    Text("\(engagement, specifier: "%.1f")% engagement")
+                    Text(String(format: "%.1f%% engagement", engagement))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -565,6 +566,6 @@ struct CreatorDetailView: View {
 }
 
 #Preview {
-    CreatorSearchView()
+    CreatorSearchView(session: SessionManager())
 }
 

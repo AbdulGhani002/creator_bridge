@@ -20,7 +20,7 @@ struct DataProtectionView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 16) {
-                        Section(header: "GDPR Compliance (EU Users)") {
+                        Section("GDPR Compliance (EU Users)") {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Under the General Data Protection Regulation (GDPR), you have the following rights:")
                                     .font(.system(size: 14, weight: .regular))
@@ -58,7 +58,7 @@ struct DataProtectionView: View {
                             }
                         }
                         
-                        Section(header: "CCPA Compliance (California Users)") {
+                        Section("CCPA Compliance (California Users)") {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Under the California Consumer Privacy Act (CCPA), California residents have the right to:")
                                     .font(.system(size: 14, weight: .regular))
@@ -71,14 +71,14 @@ struct DataProtectionView: View {
                             }
                         }
                         
-                        Section(header: "Data Retention") {
+                        Section("Data Retention") {
                             Text("We retain your personal data only for as long as necessary to provide our services or as required by law. When you delete your account, we delete or anonymize your data within 30 days, unless legal obligations require us to retain it.")
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(AppTheme.slate700)
                                 .lineSpacing(2)
                         }
                         
-                        Section(header: "Data Security") {
+                        Section("Data Security") {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("We implement industry-standard security measures:")
                                     .font(.system(size: 14, weight: .regular))
@@ -93,14 +93,14 @@ struct DataProtectionView: View {
                             }
                         }
                         
-                        Section(header: "International Transfers") {
+                        Section("International Transfers") {
                             Text("Your information may be transferred to, stored in, and processed in countries other than the country in which you reside. These countries may have data protection laws that differ from your home country. By using CreatorBridge, you consent to such transfers.")
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(AppTheme.slate700)
                                 .lineSpacing(2)
                         }
                         
-                        Section(header: "Exercise Your Rights") {
+                        Section("Exercise Your Rights") {
                             Text("To exercise any of these rights, please submit a request to privacy@creatorbridge.com with your account details. We will respond within 30 days or as required by applicable law.")
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(AppTheme.slate700)
@@ -309,14 +309,14 @@ struct RefundPolicyView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 16) {
-                        Section(header: "1. Campaign Cancellation") {
+                        Section("1. Campaign Cancellation") {
                             Text("Brands may cancel a campaign before work begins. In this case, the creator is not entitled to payment. If work has commenced, partial payment may be negotiated.")
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(AppTheme.slate700)
                                 .lineSpacing(2)
                         }
                         
-                        Section(header: "2. Dispute Resolution") {
+                        Section("2. Dispute Resolution") {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("If there's a dispute about deliverables:")
                                     .font(.system(size: 14, weight: .regular))
@@ -329,7 +329,7 @@ struct RefundPolicyView: View {
                             }
                         }
                         
-                        Section(header: "3. Refund Eligibility") {
+                        Section("3. Refund Eligibility") {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Refunds may be granted if:")
                                     .font(.system(size: 14, weight: .regular))
@@ -342,7 +342,7 @@ struct RefundPolicyView: View {
                             }
                         }
                         
-                        Section(header: "4. Non-Refundable Items") {
+                        Section("4. Non-Refundable Items") {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("The following are non-refundable:")
                                     .font(.system(size: 14, weight: .regular))
@@ -354,14 +354,14 @@ struct RefundPolicyView: View {
                             }
                         }
                         
-                        Section(header: "5. Chargeback Policy") {
+                        Section("5. Chargeback Policy") {
                             Text("Initiating a chargeback without first contacting us will result in account suspension. We will vigorously dispute chargebacks that violate this policy.")
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(AppTheme.slate700)
                                 .lineSpacing(2)
                         }
                         
-                        Section(header: "6. Refund Timeline") {
+                        Section("6. Refund Timeline") {
                             Text("Approved refunds are processed within 5-7 business days to the original payment method. Bank processing times may add 2-5 additional days.")
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(AppTheme.slate700)

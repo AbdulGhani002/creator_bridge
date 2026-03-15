@@ -204,6 +204,7 @@ class CreatorSearchViewModel: NSObject, ObservableObject {
     private let apiService: APIService
     private var cancellables = Set<AnyCancellable>()
     private var searchDebounceTimer: Timer?
+    private var searchDebounceTask: Task<Void, Never>?
     private var currentTask: Task<Void, Never>?
     
     // MARK: - Initialization
@@ -249,13 +250,34 @@ class CreatorSearchViewModel: NSObject, ObservableObject {
                 isLoading = false
                 
             } catch let networkError as NetworkError {
-                handleError(networkError)
+                await MainActor.run {
+                    self.handleError(networkError)
+                }
             } catch {
-                handleError(.networkError(error))
+                await MainActor.run {
+                    self.handleError(.networkError(error))
+                }
             }
         }
     }
     
+    /// Search with debouncing (reduces API calls while typing)
+    func searchWithDebounce(location: String) {
+        searchDebounceTask?.cancel()
+        searchDebounceTask = Task {
+            try? await Task.sleep(nanoseconds: 300_000_000) // 0.3 seconds
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                if !location.isEmpty {
+                    searchCreatorsByLocation(location, niche: nil)
+                } else {
+                    creators = []
+                    totalCount = 0
+                }
+            }
+        }
+    }
+
     /// Search creators by location (competitive advantage)
     func searchCreatorsByLocation(_ location: String, niche: NicheType? = nil) {
         currentTask?.cancel()
@@ -276,14 +298,20 @@ class CreatorSearchViewModel: NSObject, ObservableObject {
                     limit: pageSize
                 )
                 
-                creators = response.creators
-                totalCount = response.total
-                isLoading = false
+                await MainActor.run {
+                    creators = response.creators
+                    totalCount = response.total
+                    isLoading = false
+                }
                 
             } catch let networkError as NetworkError {
-                handleError(networkError)
+                await MainActor.run {
+                    self.handleError(networkError)
+                }
             } catch {
-                handleError(.networkError(error))
+                await MainActor.run {
+                    self.handleError(.networkError(error))
+                }
             }
         }
     }
@@ -333,6 +361,7 @@ class CreatorSearchViewModel: NSObject, ObservableObject {
     
     deinit {
         currentTask?.cancel()
+        searchDebounceTask?.cancel()
         searchDebounceTimer?.invalidate()
     }
 }
@@ -354,14 +383,25 @@ class CreatorAnalyticsViewModel: ObservableObject {
     func load() {
         Task {
             do {
-                isLoading = true
-                analytics = try await apiService.getCreatorAnalytics()
+                await MainActor.run {
+                    self.isLoading = true
+                }
+                let analyticsData = try await apiService.getCreatorAnalytics()
+                await MainActor.run {
+                    self.analytics = analyticsData
+                }
             } catch let networkError as NetworkError {
-                error = networkError
+                await MainActor.run {
+                    self.error = networkError
+                }
             } catch {
-                error = .networkError(error)
+                await MainActor.run {
+                    self.error = NetworkError.networkError(error)
+                }
             }
-            isLoading = false
+            await MainActor.run {
+                self.isLoading = false
+            }
         }
     }
 }
@@ -381,14 +421,25 @@ class BrandAnalyticsViewModel: ObservableObject {
     func load() {
         Task {
             do {
-                isLoading = true
-                analytics = try await apiService.getBrandAnalytics()
+                await MainActor.run {
+                    self.isLoading = true
+                }
+                let analyticsData = try await apiService.getBrandAnalytics()
+                await MainActor.run {
+                    self.analytics = analyticsData
+                }
             } catch let networkError as NetworkError {
-                error = networkError
+                await MainActor.run {
+                    self.error = networkError
+                }
             } catch {
-                error = .networkError(error)
+                await MainActor.run {
+                    self.error = NetworkError.networkError(error)
+                }
             }
-            isLoading = false
+            await MainActor.run {
+                self.isLoading = false
+            }
         }
     }
 }
@@ -410,15 +461,25 @@ class ApplicationsViewModel: ObservableObject {
     func loadApplications(campaignId: String? = nil) {
         Task {
             do {
-                isLoading = true
+                await MainActor.run {
+                    self.isLoading = true
+                }
                 let response = try await apiService.listApplications(campaignId: campaignId)
-                applications = response.applications
+                await MainActor.run {
+                    self.applications = response.applications
+                }
             } catch let networkError as NetworkError {
-                error = networkError
+                await MainActor.run {
+                    self.error = networkError
+                }
             } catch {
-                error = .networkError(error)
+                await MainActor.run {
+                    self.error = NetworkError.networkError(error)
+                }
             }
-            isLoading = false
+            await MainActor.run {
+                self.isLoading = false
+            }
         }
     }
 
@@ -426,11 +487,17 @@ class ApplicationsViewModel: ObservableObject {
         Task {
             do {
                 _ = try await apiService.updateApplication(id: applicationId, status: status)
-                loadApplications()
+                await MainActor.run {
+                    self.loadApplications()
+                }
             } catch let networkError as NetworkError {
-                error = networkError
+                await MainActor.run {
+                    self.error = networkError
+                }
             } catch {
-                error = .networkError(error)
+                await MainActor.run {
+                    self.error = NetworkError.networkError(error)
+                }
             }
         }
     }
@@ -453,15 +520,25 @@ class AgreementsViewModel: ObservableObject {
     func loadAgreements() {
         Task {
             do {
-                isLoading = true
+                await MainActor.run {
+                    self.isLoading = true
+                }
                 let response = try await apiService.listAgreements()
-                agreements = response.agreements
+                await MainActor.run {
+                    self.agreements = response.agreements
+                }
             } catch let networkError as NetworkError {
-                error = networkError
+                await MainActor.run {
+                    self.error = networkError
+                }
             } catch {
-                error = .networkError(error)
+                await MainActor.run {
+                    self.error = NetworkError.networkError(error)
+                }
             }
-            isLoading = false
+            await MainActor.run {
+                self.isLoading = false
+            }
         }
     }
 
@@ -469,11 +546,17 @@ class AgreementsViewModel: ObservableObject {
         Task {
             do {
                 _ = try await apiService.updateAgreement(id: id, update: update)
-                loadAgreements()
+                await MainActor.run {
+                    self.loadAgreements()
+                }
             } catch let networkError as NetworkError {
-                error = networkError
+                await MainActor.run {
+                    self.error = networkError
+                }
             } catch {
-                error = .networkError(error)
+                await MainActor.run {
+                    self.error = NetworkError.networkError(error)
+                }
             }
         }
     }
@@ -497,41 +580,68 @@ class MessagesViewModel: ObservableObject {
     func loadThreads() {
         Task {
             do {
-                isLoading = true
+                await MainActor.run {
+                    self.isLoading = true
+                }
                 let response = try await apiService.listThreads()
-                threads = response.threads
+                await MainActor.run {
+                    self.threads = response.threads
+                }
             } catch let networkError as NetworkError {
-                error = networkError
+                await MainActor.run {
+                    self.error = networkError
+                }
             } catch {
-                error = .networkError(error)
+                await MainActor.run {
+                    self.error = NetworkError.networkError(error)
+                }
             }
-            isLoading = false
+            await MainActor.run {
+                self.isLoading = false
+            }
         }
     }
 
     func loadMessages(threadId: String) {
         Task {
             do {
-                isLoading = true
+                await MainActor.run {
+                    self.isLoading = true
+                }
                 let response = try await apiService.listMessages(threadId: threadId)
-                messages = response.messages
+                await MainActor.run {
+                    self.messages = response.messages
+                }
             } catch let networkError as NetworkError {
-                error = networkError
+                await MainActor.run {
+                    self.error = networkError
+                }
             } catch {
-                error = .networkError(error)
+                await MainActor.run {
+                    self.error = NetworkError.networkError(error)
+                }
             }
-            isLoading = false
+            await MainActor.run {
+                self.isLoading = false
+            }
         }
     }
 
-    func sendMessage(_ payload: MessageCreateRequest) {
+    func sendMessage(_ payload: MessageCreateRequest, threadId: String? = nil) {
         Task {
             do {
                 _ = try await apiService.sendMessage(payload)
+                if let threadId = threadId {
+                    loadMessages(threadId: threadId)
+                }
             } catch let networkError as NetworkError {
-                error = networkError
+                await MainActor.run {
+                    self.error = networkError
+                }
             } catch {
-                error = .networkError(error)
+                await MainActor.run {
+                    self.error = NetworkError.networkError(error)
+                }
             }
         }
     }

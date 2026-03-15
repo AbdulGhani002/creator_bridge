@@ -86,6 +86,8 @@ enum ApplicationStatus: String, Codable {
         case .accepted: return "Accepted"
         case .rejected: return "Rejected"
         case .completed: return "Completed"
+        case .withdrawn:
+            return "Withdrawn"
         }
     }
 }
@@ -107,6 +109,7 @@ struct User: Codable, Identifiable {
     let email: String
     let role: UserRole
     let location: String
+    let subscriptionTier: String?
     let createdAt: Date?
     let updatedAt: Date?
     
@@ -116,6 +119,7 @@ struct User: Codable, Identifiable {
         case email
         case role
         case location
+        case subscriptionTier = "subscription_tier"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }
@@ -124,7 +128,7 @@ struct User: Codable, Identifiable {
 // MARK: - Creator Models
 
 struct SocialPlatform: Codable, Identifiable {
-    let id = UUID()
+    var id: String { "\(platform.rawValue)_\(handle)" }
     let platform: PlatformType
     let handle: String
     let followers: Int
@@ -825,26 +829,3 @@ struct LoginRequest: Codable {
     let password: String
 }
 
-// MARK: - Generic Response
-
-struct GenericResponse: Codable {
-    let status: String?
-    let message: String?
-    let id: String?
-}
-
-// MARK: - Application Update Request
-
-struct ApplicationUpdateRequest: Codable {
-    let status: ApplicationStatus
-}
-
-// MARK: - Block Request
-
-struct BlockCreateRequest: Codable {
-    let blockedId: String
-
-    enum CodingKeys: String, CodingKey {
-        case blockedId = "blocked_id"
-    }
-}

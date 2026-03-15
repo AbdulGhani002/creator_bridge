@@ -1,10 +1,12 @@
 import SwiftUI
 
-struct RootView: View {
+public struct RootView: View {
     @EnvironmentObject private var session: SessionManager
     @StateObject private var profileStore = ProfileStore()
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         Group {
             if !session.isAuthenticated {
                 AuthView()
@@ -37,13 +39,15 @@ struct MainTabView: View {
 }
 
 struct CreatorTabView: View {
+    @EnvironmentObject private var session: SessionManager
+
     var body: some View {
         TabView {
-            CreatorHomeView()
+            CreatorHomeView(session: session)
                 .tabItem { Label("Home", systemImage: "house") }
-            CampaignListView()
+            CampaignListView(session: session)
                 .tabItem { Label("Campaigns", systemImage: "megaphone") }
-            MessagesListView()
+            MessagesListView(session: session)
                 .tabItem { Label("Messages", systemImage: "message") }
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape") }
@@ -52,13 +56,15 @@ struct CreatorTabView: View {
 }
 
 struct BrandTabView: View {
+    @EnvironmentObject private var session: SessionManager
+
     var body: some View {
         TabView {
-            BrandHomeView()
+            BrandHomeView(session: session)
                 .tabItem { Label("Home", systemImage: "house") }
-            CreatorSearchView()
+            CreatorSearchView(session: session)
                 .tabItem { Label("Creators", systemImage: "safari") }
-            MessagesListView()
+            MessagesListView(session: session)
                 .tabItem { Label("Messages", systemImage: "message") }
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape") }

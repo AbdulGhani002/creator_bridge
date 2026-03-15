@@ -48,15 +48,23 @@ class StoreKitManager: ObservableObject {
                 
                 // Update backend with receipt
                 let tier = product.id.contains("premium") ? "premium" : "pro"
-                let receiptString = transaction.originalID.description
+                let payload = SubscriptionUpdateRequest(
+                    productId: product.id,
+                    transactionId: String(transaction.id),
+                    expiresAt: transaction.expirationDate,
+                    plan: tier
+                )
                 
-                _ = try await session.apiService.updateSubscription(planId: tier, receiptString: receiptString)
+                _ = try await session.apiService.updateSubscription(payload)
                 
                 // Finish transaction
                 await transaction.finish()
                 
                 // Refresh local session user state
-                let _ = try await session.me()
+                let updatedUser = try await session.apiService.getMe()
+                await MainActor.run {
+                    session.user = updatedUser
+                }
                 
             case .userCancelled:
                 purchaseError = "Purchase was cancelled."

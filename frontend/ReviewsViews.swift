@@ -16,7 +16,7 @@ struct ReviewFormView: View {
             Form {
                 Section("Rating") {
                     Slider(value: $rating, in: 1...5, step: 0.5)
-                    Text("Rating: \(rating, specifier: "%.1f")")
+                    Text("Rating: \(String(format: "%.1f", rating))")
                 }
                 Section("Comment") {
                     TextEditor(text: $comment)

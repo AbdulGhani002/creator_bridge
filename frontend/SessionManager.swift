@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor
-class SessionManager: ObservableObject {
+public class SessionManager: ObservableObject {
     @Published var user: User?
     @Published var authToken: String?
     @Published var isLoading = false
@@ -12,7 +12,7 @@ class SessionManager: ObservableObject {
     private let tokenKey = "creatorbridge.auth.token"
     private let userKey = "creatorbridge.auth.user"
 
-    init(apiService: APIService = APIService()) {
+    public init(apiService: APIService = APIService()) {
         self.apiService = apiService
         loadSession()
     }

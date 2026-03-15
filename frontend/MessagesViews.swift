@@ -1,13 +1,19 @@
 import SwiftUI
 
 struct MessagesListView: View {
-    @StateObject private var viewModel = MessagesViewModel()
+    let session: SessionManager
+    @StateObject private var viewModel: MessagesViewModel
+
+    init(session: SessionManager) {
+        self.session = session
+        _viewModel = StateObject(wrappedValue: MessagesViewModel(apiService: session.apiService))
+    }
 
     var body: some View {
         NavigationStack {
             List {
                 ForEach(viewModel.threads) { thread in
-                    NavigationLink(destination: ChatThreadView(thread: thread)) {
+                    NavigationLink(destination: ChatThreadView(thread: thread, session: session)) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(thread.threadId)
                                 .font(.caption)
@@ -32,10 +38,16 @@ struct MessagesListView: View {
 
 struct ChatThreadView: View {
     let thread: MessageThread
-    @StateObject private var viewModel = MessagesViewModel()
+    let session: SessionManager
+    @StateObject private var viewModel: MessagesViewModel
     @State private var messageText = ""
     @State private var showReport = false
-    @EnvironmentObject private var session: SessionManager
+
+    init(thread: MessageThread, session: SessionManager) {
+        self.thread = thread
+        self.session = session
+        _viewModel = StateObject(wrappedValue: MessagesViewModel(apiService: session.apiService))
+    }
 
     var body: some View {
         VStack {
@@ -124,9 +136,8 @@ struct ChatThreadView: View {
     private func sendMessage() {
         guard let otherId = otherParticipantId() else { return }
         let payload = MessageCreateRequest(toId: otherId, campaignId: nil, content: messageText)
-        viewModel.sendMessage(payload)
         messageText = ""
-        viewModel.loadMessages(threadId: thread.threadId)
+        viewModel.sendMessage(payload, threadId: thread.threadId)
     }
 }
 
