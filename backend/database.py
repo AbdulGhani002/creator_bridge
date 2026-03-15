@@ -3,7 +3,7 @@ MongoDB database configuration and utilities
 """
 import os
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from typing import Optional
+from typing import Any, Optional
 
 
 class Database:
@@ -105,7 +105,7 @@ class Database:
         print("✓ Database indexes created")
 
     @classmethod
-    def get_db(cls) -> AsyncIOMotorDatabase:
+    def get_db(cls) -> Any:
         """Get database instance"""
         if cls.db is None:
             raise RuntimeError("Database not initialized. Call connect_db() first.")
@@ -113,6 +113,6 @@ class Database:
 
 
 # Dependency for getting database
-async def get_database() -> AsyncIOMotorDatabase:
+async def get_database() -> Any:
     """FastAPI dependency to get database"""
     return Database.get_db()
