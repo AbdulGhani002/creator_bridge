@@ -189,6 +189,7 @@ class CreatorSearchViewModel: NSObject, ObservableObject {
     @Published var maxFollowers: Int?
     @Published var subscriptionTier: String?
     @Published var minRating: Double?
+    @Published var platform: String?
     
     // Pagination
     @Published var currentPage = 0
@@ -229,6 +230,7 @@ class CreatorSearchViewModel: NSObject, ObservableObject {
                 let response = try await apiService.searchCreators(
                     niche: selectedNiche,
                     location: searchLocation.isEmpty ? nil : searchLocation,
+                    platform: platform,
                     minFollowers: minFollowers,
                     maxFollowers: maxFollowers,
                     subscriptionTier: subscriptionTier,
@@ -310,6 +312,7 @@ class CreatorSearchViewModel: NSObject, ObservableObject {
         maxFollowers = nil
         subscriptionTier = nil
         minRating = nil
+        platform = nil
         creators = []
         totalCount = 0
     }
@@ -331,5 +334,205 @@ class CreatorSearchViewModel: NSObject, ObservableObject {
     deinit {
         currentTask?.cancel()
         searchDebounceTimer?.invalidate()
+    }
+}
+
+// MARK: - Analytics View Models
+
+@MainActor
+class CreatorAnalyticsViewModel: ObservableObject {
+    @Published var analytics: CreatorAnalytics?
+    @Published var isLoading = false
+    @Published var error: NetworkError?
+
+    private let apiService: APIService
+
+    init(apiService: APIService = APIService()) {
+        self.apiService = apiService
+    }
+
+    func load() {
+        Task {
+            do {
+                isLoading = true
+                analytics = try await apiService.getCreatorAnalytics()
+            } catch let networkError as NetworkError {
+                error = networkError
+            } catch {
+                error = .networkError(error)
+            }
+            isLoading = false
+        }
+    }
+}
+
+@MainActor
+class BrandAnalyticsViewModel: ObservableObject {
+    @Published var analytics: BrandAnalytics?
+    @Published var isLoading = false
+    @Published var error: NetworkError?
+
+    private let apiService: APIService
+
+    init(apiService: APIService = APIService()) {
+        self.apiService = apiService
+    }
+
+    func load() {
+        Task {
+            do {
+                isLoading = true
+                analytics = try await apiService.getBrandAnalytics()
+            } catch let networkError as NetworkError {
+                error = networkError
+            } catch {
+                error = .networkError(error)
+            }
+            isLoading = false
+        }
+    }
+}
+
+// MARK: - Applications View Model
+
+@MainActor
+class ApplicationsViewModel: ObservableObject {
+    @Published var applications: [Application] = []
+    @Published var isLoading = false
+    @Published var error: NetworkError?
+
+    private let apiService: APIService
+
+    init(apiService: APIService = APIService()) {
+        self.apiService = apiService
+    }
+
+    func loadApplications(campaignId: String? = nil) {
+        Task {
+            do {
+                isLoading = true
+                let response = try await apiService.listApplications(campaignId: campaignId)
+                applications = response.applications
+            } catch let networkError as NetworkError {
+                error = networkError
+            } catch {
+                error = .networkError(error)
+            }
+            isLoading = false
+        }
+    }
+
+    func updateStatus(applicationId: String, status: ApplicationStatus) {
+        Task {
+            do {
+                _ = try await apiService.updateApplication(id: applicationId, status: status)
+                loadApplications()
+            } catch let networkError as NetworkError {
+                error = networkError
+            } catch {
+                error = .networkError(error)
+            }
+        }
+    }
+}
+
+// MARK: - Agreements View Model
+
+@MainActor
+class AgreementsViewModel: ObservableObject {
+    @Published var agreements: [Agreement] = []
+    @Published var isLoading = false
+    @Published var error: NetworkError?
+
+    private let apiService: APIService
+
+    init(apiService: APIService = APIService()) {
+        self.apiService = apiService
+    }
+
+    func loadAgreements() {
+        Task {
+            do {
+                isLoading = true
+                let response = try await apiService.listAgreements()
+                agreements = response.agreements
+            } catch let networkError as NetworkError {
+                error = networkError
+            } catch {
+                error = .networkError(error)
+            }
+            isLoading = false
+        }
+    }
+
+    func updateAgreement(id: String, update: AgreementUpdateRequest) {
+        Task {
+            do {
+                _ = try await apiService.updateAgreement(id: id, update: update)
+                loadAgreements()
+            } catch let networkError as NetworkError {
+                error = networkError
+            } catch {
+                error = .networkError(error)
+            }
+        }
+    }
+}
+
+// MARK: - Messages View Model
+
+@MainActor
+class MessagesViewModel: ObservableObject {
+    @Published var threads: [MessageThread] = []
+    @Published var messages: [Message] = []
+    @Published var isLoading = false
+    @Published var error: NetworkError?
+
+    private let apiService: APIService
+
+    init(apiService: APIService = APIService()) {
+        self.apiService = apiService
+    }
+
+    func loadThreads() {
+        Task {
+            do {
+                isLoading = true
+                let response = try await apiService.listThreads()
+                threads = response.threads
+            } catch let networkError as NetworkError {
+                error = networkError
+            } catch {
+                error = .networkError(error)
+            }
+            isLoading = false
+        }
+    }
+
+    func loadMessages(threadId: String) {
+        Task {
+            do {
+                isLoading = true
+                let response = try await apiService.listMessages(threadId: threadId)
+                messages = response.messages
+            } catch let networkError as NetworkError {
+                error = networkError
+            } catch {
+                error = .networkError(error)
+            }
+            isLoading = false
+        }
+    }
+
+    func sendMessage(_ payload: MessageCreateRequest) {
+        Task {
+            do {
+                _ = try await apiService.sendMessage(payload)
+            } catch let networkError as NetworkError {
+                error = networkError
+            } catch {
+                error = .networkError(error)
+            }
+        }
     }
 }

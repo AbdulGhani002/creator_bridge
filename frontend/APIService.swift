@@ -68,7 +68,7 @@ class APIService {
     // MARK: - Initialization
     
     init(
-        baseURL: String = "https://creator-bridge.apex-logic.net",
+        baseURL: String = ProcessInfo.processInfo.environment["API_BASE_URL"] ?? "http://localhost:8000",
         session: URLSession = .shared
     ) {
         guard let url = URL(string: baseURL) else {
@@ -174,7 +174,7 @@ class APIService {
     
     // MARK: - Campaign Endpoints
     
-    func createCampaign(_ campaign: CampaignCreateRequest) async throws -> Campaign {
+    func createCampaign(_ campaign: CampaignCreateRequest) async throws -> GenericResponse {
         try await request(
             path: "/api/v1/campaigns",
             method: .post,
@@ -223,12 +223,17 @@ class APIService {
     func getCampaignDetail(id: String) async throws -> Campaign {
         try await request(path: "/api/v1/campaigns/\(id)")
     }
+
+    func updateCampaign(id: String, update: CampaignUpdateRequest) async throws -> GenericResponse {
+        try await request(path: "/api/v1/campaigns/\(id)", method: .put, body: update)
+    }
     
     // MARK: - Creator Endpoints
     
     func searchCreators(
         niche: NicheType? = nil,
         location: String? = nil,
+        platform: String? = nil,
         minFollowers: Int? = nil,
         maxFollowers: Int? = nil,
         subscriptionTier: String? = nil,
@@ -248,6 +253,10 @@ class APIService {
         
         if let location = location {
             queryItems.append(URLQueryItem(name: "location", value: location))
+        }
+
+        if let platform = platform {
+            queryItems.append(URLQueryItem(name: "platform", value: platform))
         }
         
         if let minFollowers = minFollowers {
@@ -292,6 +301,228 @@ class APIService {
         
         let response: CreatorSearchResponse = try await request(path: path)
         return response
+    }
+
+    func createCreatorProfile(_ profile: CreatorProfileCreateRequest) async throws -> GenericResponse {
+        try await request(path: "/api/v1/creators", method: .post, body: profile)
+    }
+
+    func updateCreatorProfile(id: String, update: CreatorProfileUpdateRequest) async throws -> GenericResponse {
+        try await request(path: "/api/v1/creators/\(id)", method: .put, body: update)
+    }
+
+    func getCreatorProfileByUser(id: String) async throws -> CreatorProfile {
+        try await request(path: "/api/v1/creators/user/\(id)")
+    }
+
+    // MARK: - Brand Endpoints
+
+    func createBrandProfile(_ profile: BrandProfileCreateRequest) async throws -> GenericResponse {
+        try await request(path: "/api/v1/brands", method: .post, body: profile)
+    }
+
+    func updateBrandProfile(id: String, update: BrandProfileUpdateRequest) async throws -> GenericResponse {
+        try await request(path: "/api/v1/brands/\(id)", method: .put, body: update)
+    }
+
+    func getBrandProfile(id: String) async throws -> BrandProfile {
+        try await request(path: "/api/v1/brands/\(id)")
+    }
+
+    func getBrandProfileByUser(id: String) async throws -> BrandProfile {
+        try await request(path: "/api/v1/brands/user/\(id)")
+    }
+
+    // MARK: - Auth Endpoints
+
+    func signup(_ payload: SignupRequest) async throws -> AuthResponse {
+        try await request(path: "/api/v1/auth/signup", method: .post, body: payload)
+    }
+
+    func login(_ payload: LoginRequest) async throws -> AuthResponse {
+        try await request(path: "/api/v1/auth/login", method: .post, body: payload)
+    }
+
+    func demoLogin(role: String) async throws -> AuthResponse {
+        let path = buildQueryPath("/api/v1/auth/demo", queryItems: [
+            URLQueryItem(name: "role", value: role)
+        ])
+        return try await request(path: path, method: .post)
+    }
+
+    func getMe() async throws -> User {
+        try await request(path: "/api/v1/auth/me")
+    }
+
+    func deleteAccount() async throws -> GenericResponse {
+        try await request(path: "/api/v1/auth/account", method: .delete)
+    }
+
+    // MARK: - Applications
+
+    func createApplication(_ payload: ApplicationCreateRequest) async throws -> GenericResponse {
+        try await request(path: "/api/v1/applications", method: .post, body: payload)
+    }
+
+    func listApplications(
+        campaignId: String? = nil,
+        creatorId: String? = nil,
+        brandId: String? = nil,
+        status: ApplicationStatus? = nil,
+        skip: Int = 0,
+        limit: Int = 20
+    ) async throws -> ApplicationsResponse {
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "skip", value: String(skip)),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+        if let campaignId = campaignId {
+            queryItems.append(URLQueryItem(name: "campaign_id", value: campaignId))
+        }
+        if let creatorId = creatorId {
+            queryItems.append(URLQueryItem(name: "creator_id", value: creatorId))
+        }
+        if let brandId = brandId {
+            queryItems.append(URLQueryItem(name: "brand_id", value: brandId))
+        }
+        if let status = status {
+            queryItems.append(URLQueryItem(name: "status", value: status.rawValue))
+        }
+        let path = buildQueryPath("/api/v1/applications", queryItems: queryItems)
+        return try await request(path: path)
+    }
+
+    func updateApplication(id: String, status: ApplicationStatus) async throws -> GenericResponse {
+        let payload = ApplicationUpdateRequest(status: status)
+        return try await request(path: "/api/v1/applications/\(id)", method: .put, body: payload)
+    }
+
+    // MARK: - Agreements
+
+    func createAgreement(_ payload: AgreementCreateRequest) async throws -> GenericResponse {
+        try await request(path: "/api/v1/agreements", method: .post, body: payload)
+    }
+
+    func listAgreements(
+        campaignId: String? = nil,
+        creatorId: String? = nil,
+        brandId: String? = nil,
+        status: AgreementStatus? = nil,
+        skip: Int = 0,
+        limit: Int = 20
+    ) async throws -> AgreementsResponse {
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "skip", value: String(skip)),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+        if let campaignId = campaignId {
+            queryItems.append(URLQueryItem(name: "campaign_id", value: campaignId))
+        }
+        if let creatorId = creatorId {
+            queryItems.append(URLQueryItem(name: "creator_id", value: creatorId))
+        }
+        if let brandId = brandId {
+            queryItems.append(URLQueryItem(name: "brand_id", value: brandId))
+        }
+        if let status = status {
+            queryItems.append(URLQueryItem(name: "status", value: status.rawValue))
+        }
+        let path = buildQueryPath("/api/v1/agreements", queryItems: queryItems)
+        return try await request(path: path)
+    }
+
+    func updateAgreement(id: String, update: AgreementUpdateRequest) async throws -> GenericResponse {
+        return try await request(path: "/api/v1/agreements/\(id)", method: .put, body: update)
+    }
+
+    // MARK: - Messages
+
+    func listThreads(skip: Int = 0, limit: Int = 20) async throws -> ThreadsResponse {
+        let path = buildQueryPath("/api/v1/messages/threads", queryItems: [
+            URLQueryItem(name: "skip", value: String(skip)),
+            URLQueryItem(name: "limit", value: String(limit))
+        ])
+        return try await request(path: path)
+    }
+
+    func listMessages(threadId: String, skip: Int = 0, limit: Int = 50) async throws -> MessagesResponse {
+        let path = buildQueryPath("/api/v1/messages", queryItems: [
+            URLQueryItem(name: "thread_id", value: threadId),
+            URLQueryItem(name: "skip", value: String(skip)),
+            URLQueryItem(name: "limit", value: String(limit))
+        ])
+        return try await request(path: path)
+    }
+
+    func sendMessage(_ payload: MessageCreateRequest) async throws -> GenericResponse {
+        return try await request(path: "/api/v1/messages", method: .post, body: payload)
+    }
+
+    func markMessageRead(id: String) async throws -> GenericResponse {
+        return try await request(path: "/api/v1/messages/\(id)/read", method: .put)
+    }
+
+    // MARK: - Reviews
+
+    func createReview(_ payload: ReviewCreateRequest) async throws -> GenericResponse {
+        return try await request(path: "/api/v1/reviews", method: .post, body: payload)
+    }
+
+    func listReviews(revieweeId: String? = nil, revieweeRole: String? = nil, skip: Int = 0, limit: Int = 20) async throws -> ReviewsResponse {
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "skip", value: String(skip)),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+        if let revieweeId = revieweeId {
+            queryItems.append(URLQueryItem(name: "reviewee_id", value: revieweeId))
+        }
+        if let revieweeRole = revieweeRole {
+            queryItems.append(URLQueryItem(name: "reviewee_role", value: revieweeRole))
+        }
+        let path = buildQueryPath("/api/v1/reviews", queryItems: queryItems)
+        return try await request(path: path)
+    }
+
+    // MARK: - Analytics
+
+    func getCreatorAnalytics() async throws -> CreatorAnalytics {
+        try await request(path: "/api/v1/analytics/creator/me")
+    }
+
+    func getBrandAnalytics() async throws -> BrandAnalytics {
+        try await request(path: "/api/v1/analytics/brand/me")
+    }
+
+    // MARK: - Plans & Subscriptions
+
+    func getPlans() async throws -> PlansResponse {
+        try await request(path: "/api/v1/plans")
+    }
+
+    func getSubscription() async throws -> SubscriptionResponse {
+        try await request(path: "/api/v1/subscriptions/me")
+    }
+
+    func updateSubscription(_ payload: SubscriptionUpdateRequest) async throws -> GenericResponse {
+        try await request(path: "/api/v1/subscriptions/ios", method: .post, body: payload)
+    }
+
+    // MARK: - Moderation
+
+    func report(_ payload: ReportCreateRequest) async throws -> GenericResponse {
+        try await request(path: "/api/v1/reports", method: .post, body: payload)
+    }
+
+    func blockUser(blockedId: String) async throws -> GenericResponse {
+        return try await request(path: "/api/v1/blocks", method: .post, body: BlockCreateRequest(blockedId: blockedId))
+    }
+
+    func listBlocks() async throws -> BlocksResponse {
+        try await request(path: "/api/v1/blocks")
+    }
+
+    func unblock(blockId: String) async throws -> GenericResponse {
+        try await request(path: "/api/v1/blocks/\(blockId)", method: .delete)
     }
     
     // MARK: - Helper Methods

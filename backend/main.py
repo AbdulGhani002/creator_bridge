@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from motor.motor_asyncio import AsyncIOMotorDatabase
 from contextlib import asynccontextmanager
 import logging
 from datetime import datetime
@@ -10,10 +10,12 @@ import os
 from dotenv import load_dotenv
 from bson import ObjectId
 from bson.errors import InvalidId
+from database import Database, get_database
 
 # Import routes
 try:
     from routes import campaigns, creators, brands, messages, plans
+    from routes import auth, applications, agreements, reviews, reports, blocks, subscriptions, analytics
 except ImportError:
     # Fallback if routes not available
     campaigns = None
@@ -21,6 +23,14 @@ except ImportError:
     brands = None
     messages = None
     plans = None
+    auth = None
+    applications = None
+    agreements = None
+    reviews = None
+    reports = None
+    blocks = None
+    subscriptions = None
+    analytics = None
 
 # Load environment variables
 load_dotenv()
@@ -29,71 +39,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# MARK: - Database Configuration
-
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-DATABASE_NAME = os.getenv("DATABASE_NAME", "creator_bridge")
-
-mongo_client: AsyncIOMotorClient = None
-db: AsyncIOMotorDatabase = None
-
-async def connect_to_mongo():
-    """Initialize MongoDB connection"""
-    global mongo_client, db
-    logger.info("[CONNECT] Connecting to MongoDB...")
-    mongo_client = AsyncIOMotorClient(MONGODB_URL)
-    db = mongo_client[DATABASE_NAME]
-    
-    # Create indexes
-    await create_indexes()
-    logger.info("[CONNECT] Connected to MongoDB successfully")
-
-async def close_mongo_connection():
-    """Close MongoDB connection"""
-    global mongo_client
-    logger.info("[CLOSE] Closing MongoDB connection...")
-    if mongo_client:
-        mongo_client.close()
-    logger.info("[CLOSE] MongoDB connection closed")
-
-async def create_indexes():
-    """Create database indexes for collections"""
-    try:
-        # Campaigns collection indexes
-        await db.campaigns.create_index([("niche", 1), ("location", 1), ("status", 1)])
-        await db.campaigns.create_index([("brand_id", 1), ("created_at", -1)])
-        await db.campaigns.create_index([("status", 1), ("created_at", -1)])
-        
-        # Creators collection indexes
-        await db.creators.create_index([("niche", 1), ("verified", 1)])
-        await db.creators.create_index([("user_id", 1)])
-        await db.creators.create_index([("name", "text"), ("bio", "text")])
-        await db.creators.create_index([("location", 1)])
-        await db.creators.create_index([("subscription_tier", 1)])
-        
-        # Users collection indexes
-        await db.users.create_index([("email", 1)], unique=True)
-        await db.users.create_index([("user_type", 1)])
-        
-        # Brands collection indexes
-        await db.brands.create_index([("company_name", 1)])
-        await db.brands.create_index([("verified", 1)])
-
-        # Messages collection indexes
-        await db.messages.create_index([("campaign_id", 1)])
-        await db.messages.create_index([("from_id", 1), ("to_id", 1)])
-
-        # Plans collection indexes
-        await db.plans.create_index([("name", 1)])
-
-        # Applications collection indexes
-        await db.applications.create_index([("creator_id", 1), ("status", 1)])
-        await db.applications.create_index([("campaign_id", 1)])
-        await db.applications.create_index([("brand_id", 1)])
-        
-        logger.info("[INDEXES] Database indexes created successfully")
-    except Exception as e:
-        logger.error(f"[ERROR] Error creating indexes: {str(e)}")
+# MARK: - Database Configuration (uses Database utility)
 
 # MARK: - Application Lifespan
 
@@ -101,11 +47,11 @@ async def create_indexes():
 async def lifespan(app: FastAPI):
     """Manage application startup and shutdown"""
     # Startup event
-    await connect_to_mongo()
+    await Database.connect_db()
     logger.info("[STARTUP] Application started successfully")
     yield
     # Shutdown event
-    await close_mongo_connection()
+    await Database.close_db()
     logger.info("[SHUTDOWN] Application shutdown")
 
 # MARK: - FastAPI Application
@@ -180,9 +126,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 # MARK: - Dependency Injection
 
-async def get_database() -> AsyncIOMotorDatabase:
-    """Dependency to inject database"""
-    return db
+# get_database dependency imported from database.py
 
 # MARK: - Route Registration
 
@@ -197,6 +141,22 @@ if messages and hasattr(messages, 'router'):
     app.include_router(messages.router, prefix="/api/v1")
 if plans and hasattr(plans, 'router'):
     app.include_router(plans.router, prefix="/api/v1")
+if auth and hasattr(auth, 'router'):
+    app.include_router(auth.router, prefix="/api/v1")
+if applications and hasattr(applications, 'router'):
+    app.include_router(applications.router, prefix="/api/v1")
+if agreements and hasattr(agreements, 'router'):
+    app.include_router(agreements.router, prefix="/api/v1")
+if reviews and hasattr(reviews, 'router'):
+    app.include_router(reviews.router, prefix="/api/v1")
+if reports and hasattr(reports, 'router'):
+    app.include_router(reports.router, prefix="/api/v1")
+if blocks and hasattr(blocks, 'router'):
+    app.include_router(blocks.router, prefix="/api/v1")
+if subscriptions and hasattr(subscriptions, 'router'):
+    app.include_router(subscriptions.router, prefix="/api/v1")
+if analytics and hasattr(analytics, 'router'):
+    app.include_router(analytics.router, prefix="/api/v1")
 
 # Direct simple API routes (fallback if service routes fail to load)
 
@@ -205,7 +165,8 @@ async def list_creators_simple(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     q: str = Query(None),
-    niche: str = Query(None)
+    niche: str = Query(None),
+    db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     """
     List all creators with optional search and filtering
@@ -231,7 +192,10 @@ async def list_creators_simple(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/creators/{creator_id}", tags=["creators"])
-async def get_creator_simple(creator_id: str):
+async def get_creator_simple(
+    creator_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
     """
     Get creator by ID
     """
@@ -253,7 +217,10 @@ async def get_creator_simple(creator_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/creators/{creator_id}/stats", tags=["creators"])
-async def get_creator_stats_simple(creator_id: str):
+async def get_creator_stats_simple(
+    creator_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
     """
     Get creator statistics
     """
@@ -283,7 +250,8 @@ async def list_campaigns_simple(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     niche: str = Query(None),
-    status: str = Query(None)
+    status: str = Query(None),
+    db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     """
     List all campaigns with optional filtering
@@ -306,7 +274,10 @@ async def list_campaigns_simple(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/campaigns/{campaign_id}", tags=["campaigns"])
-async def get_campaign_simple(campaign_id: str):
+async def get_campaign_simple(
+    campaign_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
     """
     Get campaign by ID
     """
@@ -379,7 +350,7 @@ async def startup_event():
     """Run on application startup"""
     logger.info("[STARTUP] CreatorBridge API starting up...")
     logger.info(f"[ENV] Environment: {os.getenv('ENV', 'development')}")
-    logger.info(f"[DB] Database: {DATABASE_NAME}")
+    logger.info(f"[DB] Database: {os.getenv('DATABASE_NAME', 'creator_bridge')}")
 
 @app.on_event("shutdown")
 async def shutdown_event():

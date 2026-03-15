@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "CreatorBridgeFrontend",
     platforms: [
-        .macOS(.v13)
+        .iOS(.v17)
     ],
     products: [
         .library(

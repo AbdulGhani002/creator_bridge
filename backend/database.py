@@ -2,27 +2,23 @@
 MongoDB database configuration and utilities
 """
 import os
-from motor.motor_asyncio import AsyncClient, AsyncDatabase
-from contextlib import asynccontextmanager
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from typing import Optional
 
 
 class Database:
     """MongoDB database connection manager"""
     
-    client: Optional[AsyncClient] = None
-    db: Optional[AsyncDatabase] = None
+    client: Optional[AsyncIOMotorClient] = None
+    db: Optional[AsyncIOMotorDatabase] = None
 
     @classmethod
     async def connect_db(cls):
         """Initialize MongoDB connection"""
-        MONGO_URL = os.getenv(
-            "MONGO_URL",
-            "mongodb://localhost:27017"
-        )
+        MONGO_URL = os.getenv("MONGO_URL") or os.getenv("MONGODB_URL") or "mongodb://localhost:27017"
         DATABASE_NAME = os.getenv("DATABASE_NAME", "creator_bridge")
         
-        cls.client = AsyncClient(MONGO_URL)
+        cls.client = AsyncIOMotorClient(MONGO_URL)
         cls.db = cls.client[DATABASE_NAME]
         
         # Create indexes
@@ -75,11 +71,41 @@ class Database:
             [("campaign_id", 1), ("creator_id", 1)],
             unique=True
         )
+
+        # Messages indexes
+        await cls.db["messages"].create_index("campaign_id")
+        await cls.db["messages"].create_index("from_id")
+        await cls.db["messages"].create_index("to_id")
+        await cls.db["messages"].create_index("thread_id")
+        await cls.db["messages"].create_index("participants")
+
+        # Agreements indexes
+        await cls.db["agreements"].create_index("campaign_id")
+        await cls.db["agreements"].create_index("creator_id")
+        await cls.db["agreements"].create_index("brand_id")
+        await cls.db["agreements"].create_index("status")
+
+        # Reviews indexes
+        await cls.db["reviews"].create_index("reviewee_id")
+        await cls.db["reviews"].create_index("reviewer_id")
+        await cls.db["reviews"].create_index("reviewee_role")
+
+        # Reports indexes
+        await cls.db["reports"].create_index("reporter_id")
+        await cls.db["reports"].create_index("target_type")
+        await cls.db["reports"].create_index("status")
+
+        # Blocks indexes
+        await cls.db["blocks"].create_index("blocker_id")
+        await cls.db["blocks"].create_index("blocked_id")
+
+        # Subscriptions indexes
+        await cls.db["subscriptions"].create_index("user_id", unique=True)
         
         print("✓ Database indexes created")
 
     @classmethod
-    def get_db(cls) -> AsyncDatabase:
+    def get_db(cls) -> AsyncIOMotorDatabase:
         """Get database instance"""
         if cls.db is None:
             raise RuntimeError("Database not initialized. Call connect_db() first.")
@@ -87,6 +113,6 @@ class Database:
 
 
 # Dependency for getting database
-async def get_database() -> AsyncDatabase:
+async def get_database() -> AsyncIOMotorDatabase:
     """FastAPI dependency to get database"""
     return Database.get_db()

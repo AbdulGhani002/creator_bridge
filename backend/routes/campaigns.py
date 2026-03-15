@@ -4,6 +4,8 @@ from bson import ObjectId
 from datetime import datetime
 from pydantic import BaseModel, Field
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from database import get_database
+from security import get_current_user
 
 # Models
 class CampaignCreate(BaseModel):
@@ -117,15 +119,19 @@ def normalize_id(doc: dict) -> dict:
     doc["id"] = doc["_id"]
     return doc
 
-async def get_campaign_service(db: AsyncIOMotorDatabase) -> CampaignService:
+async def get_campaign_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> CampaignService:
     return CampaignService(db)
 
 @router.post("/", response_model=dict)
 async def create_campaign(
     campaign: CampaignCreate,
-    service: CampaignService = Depends(get_campaign_service)
+    service: CampaignService = Depends(get_campaign_service),
+    current_user: dict = Depends(get_current_user)
 ) -> dict:
     try:
+        if current_user.get("role") != "brand":
+            raise HTTPException(status_code=403, detail="Only brands can create campaigns")
+        campaign.brand_id = current_user.get("id")
         campaign_id = await service.create_campaign(campaign)
         return {
             "id": campaign_id,
@@ -200,8 +206,14 @@ async def get_campaign(
 async def update_campaign(
     campaign_id: str = Path(..., description="Campaign ID"),
     campaign_update: CampaignUpdate = None,
-    service: CampaignService = Depends(get_campaign_service)
+    service: CampaignService = Depends(get_campaign_service),
+    current_user: dict = Depends(get_current_user)
 ) -> dict:
+    if current_user.get("role") != "brand":
+        raise HTTPException(status_code=403, detail="Only brands can update campaigns")
+    campaign = await service.get_campaign_by_id(campaign_id)
+    if not campaign or campaign.get("brand_id") != current_user.get("id"):
+        raise HTTPException(status_code=403, detail="Not authorized")
     success = await service.update_campaign(campaign_id, campaign_update)
     if not success:
         raise HTTPException(status_code=404, detail="Campaign not found")
@@ -213,8 +225,14 @@ async def update_campaign(
 @router.delete("/{campaign_id}", response_model=dict)
 async def delete_campaign(
     campaign_id: str = Path(..., description="Campaign ID"),
-    service: CampaignService = Depends(get_campaign_service)
+    service: CampaignService = Depends(get_campaign_service),
+    current_user: dict = Depends(get_current_user)
 ) -> dict:
+    if current_user.get("role") != "brand":
+        raise HTTPException(status_code=403, detail="Only brands can delete campaigns")
+    campaign = await service.get_campaign_by_id(campaign_id)
+    if not campaign or campaign.get("brand_id") != current_user.get("id"):
+        raise HTTPException(status_code=403, detail="Not authorized")
     success = await service.delete_campaign(campaign_id)
     if not success:
         raise HTTPException(status_code=404, detail="Campaign not found")

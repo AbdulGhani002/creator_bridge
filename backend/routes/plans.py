@@ -1,6 +1,7 @@
 ﻿from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from database import get_database
 from datetime import datetime
 
 DEFAULT_PLANS = [
@@ -47,7 +48,7 @@ def normalize_id(doc: dict) -> dict:
     doc["id"] = doc["_id"]
     return doc
 
-async def get_plan_service(db: AsyncIOMotorDatabase) -> PlanService:
+async def get_plan_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> PlanService:
     return PlanService(db)
 
 @router.get("/", response_model=dict)

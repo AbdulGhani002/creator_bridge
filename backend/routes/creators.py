@@ -4,6 +4,8 @@ from bson import ObjectId
 from datetime import datetime
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from database import get_database
+from security import get_current_user
 
 # Models
 class CreatorProfile(BaseModel):
@@ -17,6 +19,7 @@ class CreatorProfile(BaseModel):
     profile_image_url: Optional[str] = None
     portfolio_url: Optional[str] = None
     social_links: dict = {}
+    platforms: Optional[list] = None
     subscription_tier: Optional[str] = "free"
     pricing_per_post: Optional[float] = None
     total_earnings: Optional[float] = 0.0
@@ -36,6 +39,7 @@ class CreatorUpdate(BaseModel):
     followers_count: Optional[int] = None
     portfolio_url: Optional[str] = None
     social_links: Optional[dict] = None
+    platforms: Optional[list] = None
     subscription_tier: Optional[str] = None
     pricing_per_post: Optional[float] = None
     rating: Optional[float] = None
@@ -75,6 +79,7 @@ class CreatorService:
         q: Optional[str] = None,
         niche: Optional[str] = None,
         location: Optional[str] = None,
+        platform: Optional[str] = None,
         min_followers: Optional[int] = None,
         max_followers: Optional[int] = None,
         subscription_tier: Optional[str] = None,
@@ -92,6 +97,12 @@ class CreatorService:
             query["niche"] = niche
         if location:
             query["location"] = {"$regex": location, "$options": "i"}
+        if platform:
+            query["$or"] = query.get("$or", [])
+            query["$or"].extend([
+                {"platforms": {"$in": [platform]}},
+                {f"social_links.{platform}": {"$exists": True}}
+            ])
         if subscription_tier:
             query["subscription_tier"] = subscription_tier
         if min_rating is not None:
@@ -157,15 +168,21 @@ def normalize_id(doc: dict) -> dict:
     doc["id"] = doc["_id"]
     return doc
 
-async def get_creator_service(db: AsyncIOMotorDatabase):
+async def get_creator_service(db: AsyncIOMotorDatabase = Depends(get_database)):
     return CreatorService(db)
 
 @router.post("/", response_model=dict)
 async def create_creator(
     creator: CreatorProfile,
-    service: CreatorService = Depends(get_creator_service)
+    service: CreatorService = Depends(get_creator_service),
+    current_user: dict = Depends(get_current_user)
 ) -> dict:
     try:
+        if current_user.get("role") != "creator":
+            raise HTTPException(status_code=403, detail="Only creators can create profiles")
+        creator.user_id = current_user.get("id")
+        if not creator.name:
+            creator.name = current_user.get("name", "Creator")
         creator_id = await service.create_creator_profile(creator)
         return {
             "id": creator_id,
@@ -200,6 +217,7 @@ async def search_creators(
     q: Optional[str] = None,
     niche: Optional[str] = None,
     location: Optional[str] = None,
+    platform: Optional[str] = None,
     min_followers: Optional[int] = None,
     max_followers: Optional[int] = None,
     subscription_tier: Optional[str] = None,
@@ -213,6 +231,7 @@ async def search_creators(
             q=q,
             niche=niche,
             location=location,
+            platform=platform,
             min_followers=min_followers,
             max_followers=max_followers,
             subscription_tier=subscription_tier,
@@ -279,8 +298,14 @@ async def get_creator_by_user(
 async def update_creator(
     creator_id: str = Path(..., description="Creator ID"),
     creator_update: CreatorUpdate = None,
-    service: CreatorService = Depends(get_creator_service)
+    service: CreatorService = Depends(get_creator_service),
+    current_user: dict = Depends(get_current_user)
 ) -> dict:
+    if current_user.get("role") != "creator":
+        raise HTTPException(status_code=403, detail="Only creators can update profiles")
+    creator = await service.get_creator_by_id(creator_id)
+    if not creator or creator.get("user_id") != current_user.get("id"):
+        raise HTTPException(status_code=403, detail="Not authorized")
     success = await service.update_creator(creator_id, creator_update)
     if not success:
         raise HTTPException(status_code=404, detail="Creator not found")
@@ -305,11 +330,14 @@ async def get_creator_statistics(
 @router.get("/{creator_id}/earnings", response_model=dict)
 async def get_creator_earnings(
     creator_id: str = Path(..., description="Creator ID"),
-    service: CreatorService = Depends(get_creator_service)
+    service: CreatorService = Depends(get_creator_service),
+    current_user: dict = Depends(get_current_user)
 ) -> dict:
     creator = await service.get_creator_by_id(creator_id)
     if not creator:
         raise HTTPException(status_code=404, detail="Creator not found")
+    if current_user.get("role") == "creator" and creator.get("user_id") != current_user.get("id"):
+        raise HTTPException(status_code=403, detail="Not authorized")
 
     return {
         "creator_id": creator_id,

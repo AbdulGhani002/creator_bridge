@@ -1,8 +1,10 @@
-﻿import SwiftUI
+import SwiftUI
 
 // MARK: - Subscription Plans View
 struct SubscriptionPlansView: View {
     @State private var billingPeriod = 0 // 0: Monthly, 1: Annual
+    @EnvironmentObject private var session: SessionManager
+    @StateObject private var storeManager = StoreKitManager.shared
 
     private let plans: [PlanData] = [
         PlanData(
@@ -16,7 +18,8 @@ struct SubscriptionPlansView: View {
             ],
             cta: "Start for Free",
             highlighted: false,
-            badge: nil
+            badge: nil,
+            productId: nil
         ),
         PlanData(
             name: "Pro",
@@ -30,7 +33,8 @@ struct SubscriptionPlansView: View {
             ],
             cta: "Go Pro Now",
             highlighted: true,
-            badge: "Most Popular"
+            badge: "Most Popular",
+            productId: "com.creatorbridge.pro.monthly"
         ),
         PlanData(
             name: "Premium",
@@ -44,7 +48,8 @@ struct SubscriptionPlansView: View {
             ],
             cta: "Get Featured",
             highlighted: false,
-            badge: nil
+            badge: nil,
+            productId: "com.creatorbridge.premium.monthly"
         )
     ]
 
@@ -68,6 +73,22 @@ struct SubscriptionPlansView: View {
             }
         }
         .navigationBarHidden(true)
+        .overlay(
+            Group {
+                if storeManager.isLoading {
+                    Color.black.opacity(0.4).ignoresSafeArea()
+                    ProgressView("Processing...")
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                }
+            }
+        )
+        .alert("Store Error", isPresented: .constant(storeManager.purchaseError != nil)) {
+            Button("OK") { storeManager.purchaseError = nil }
+        } message: {
+            Text(storeManager.purchaseError ?? "")
+        }
     }
 
     private var header: some View {
@@ -145,7 +166,7 @@ struct SubscriptionPlansView: View {
     private var pricingGrid: some View {
         VStack(spacing: 16) {
             ForEach(plans) { plan in
-                PlanCardView(plan: plan)
+                PlanCardView(plan: plan, storeManager: storeManager)
             }
         }
         .padding(.horizontal, 16)
@@ -200,6 +221,7 @@ struct PlanData: Identifiable {
     let cta: String
     let highlighted: Bool
     let badge: String?
+    let productId: String?
 }
 
 struct Feature: Identifiable {
@@ -211,6 +233,8 @@ struct Feature: Identifiable {
 
 struct PlanCardView: View {
     let plan: PlanData
+    @ObservedObject var storeManager: StoreKitManager
+    @EnvironmentObject private var session: SessionManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -255,7 +279,13 @@ struct PlanCardView: View {
                 }
             }
 
-            Button(action: {}) {
+            Button(action: {
+                if let pid = plan.productId, let product = storeManager.products.first(where: { $0.id == pid }) {
+                    Task {
+                        try? await storeManager.purchase(product, session: session)
+                    }
+                }
+            }) {
                 Text(plan.cta)
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(plan.highlighted ? .white : AppTheme.primary)

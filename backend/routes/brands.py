@@ -4,6 +4,8 @@ from bson import ObjectId
 from datetime import datetime
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from database import get_database
+from security import get_current_user
 
 # Models
 class BrandProfile(BaseModel):
@@ -74,15 +76,19 @@ def normalize_id(doc: dict) -> dict:
     doc["id"] = doc["_id"]
     return doc
 
-async def get_brand_service(db: AsyncIOMotorDatabase) -> BrandService:
+async def get_brand_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> BrandService:
     return BrandService(db)
 
 @router.post("/", response_model=dict)
 async def create_brand(
     brand: BrandProfile,
-    service: BrandService = Depends(get_brand_service)
+    service: BrandService = Depends(get_brand_service),
+    current_user: dict = Depends(get_current_user)
 ) -> dict:
     try:
+        if current_user.get("role") != "brand":
+            raise HTTPException(status_code=403, detail="Only brands can create profiles")
+        brand.user_id = current_user.get("id")
         brand_id = await service.create_brand(brand)
         return {"id": brand_id, "message": "Brand created", "status": "success"}
     except Exception as e:
@@ -112,12 +118,28 @@ async def get_brand(
         raise HTTPException(status_code=404, detail="Brand not found")
     return normalize_id(brand)
 
+@router.get("/user/{user_id}", response_model=dict)
+async def get_brand_by_user(
+    user_id: str = Path(..., description="User ID"),
+    service: BrandService = Depends(get_brand_service)
+) -> dict:
+    brand = await service.collection.find_one({"user_id": user_id})
+    if not brand:
+        raise HTTPException(status_code=404, detail="Brand profile not found")
+    return normalize_id(brand)
+
 @router.put("/{brand_id}", response_model=dict)
 async def update_brand(
     brand_id: str = Path(..., description="Brand ID"),
     update: BrandUpdate = None,
-    service: BrandService = Depends(get_brand_service)
+    service: BrandService = Depends(get_brand_service),
+    current_user: dict = Depends(get_current_user)
 ) -> dict:
+    if current_user.get("role") != "brand":
+        raise HTTPException(status_code=403, detail="Only brands can update profiles")
+    brand = await service.get_brand(brand_id)
+    if not brand or brand.get("user_id") != current_user.get("id"):
+        raise HTTPException(status_code=403, detail="Not authorized")
     success = await service.update_brand(brand_id, update)
     if not success:
         raise HTTPException(status_code=404, detail="Brand not found")

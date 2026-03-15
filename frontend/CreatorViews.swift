@@ -1,4 +1,4 @@
-import SwiftUI
+﻿import SwiftUI
 
 // MARK: - Creator Search View
 
@@ -156,7 +156,7 @@ struct CreatorRowView: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
                     // Creator info would go here (name from user)
-                    Text(creator.niche.displayName)
+                    Text(creator.niche?.displayName ?? "Creator")
                         .font(.headline)
                         .lineLimit(1)
                     
@@ -208,7 +208,7 @@ struct CreatorRowView: View {
                         .font(.caption)
                         .foregroundStyle(.green)
                     
-                    Text("$\(creator.pricingPerPost, specifier: "%.0f")/post")
+                    Text("$\(creator.pricingPerPost ?? 0, specifier: "%.0f")/post")
                         .font(.caption)
                         .fontWeight(.medium)
                 }
@@ -226,7 +226,7 @@ struct CreatorRowView: View {
     }
     
     private var subscriptionBadge: some View {
-        Text(creator.subscriptionTier.uppercased())
+        Text((creator.subscriptionTier ?? "free").uppercased())
             .font(.caption2)
             .fontWeight(.semibold)
             .foregroundStyle(.white)
@@ -237,7 +237,7 @@ struct CreatorRowView: View {
     }
     
     private var subscriptionColor: Color {
-        switch creator.subscriptionTier {
+        switch creator.subscriptionTier ?? "free" {
         case "pro":
             return .blue
         case "premium":
@@ -249,12 +249,12 @@ struct CreatorRowView: View {
     
     private var platformsStack: some View {
         HStack(spacing: 8) {
-            ForEach(creator.socialPlatforms.prefix(3)) { platform in
+            ForEach((creator.socialPlatforms ?? []).prefix(3)) { platform in
                 platformBadge(platform)
             }
             
-            if creator.socialPlatforms.count > 3 {
-                Text("+\(creator.socialPlatforms.count - 3) more")
+            if (creator.socialPlatforms ?? []).count > 3 {
+                Text("+\((creator.socialPlatforms ?? []).count - 3) more")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -328,6 +328,15 @@ struct CreatorFilterView: View {
                         Text("4.5+").tag(4.5)
                     }
                 }
+
+                Section("Platform") {
+                    Picker("Platform", selection: $viewModel.platform) {
+                        Text("Any").tag(nil as String?)
+                        ForEach(PlatformType.allCases, id: \.self) { platform in
+                            Text(platform.displayName).tag(platform.rawValue as String?)
+                        }
+                    }
+                }
                 
                 Section("Subscription Tier") {
                     Picker("Subscription", selection: $viewModel.subscriptionTier) {
@@ -370,7 +379,7 @@ struct CreatorDetailView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text(creator.niche.displayName)
+                            Text(creator.niche?.displayName ?? "Creator")
                                 .font(.title2)
                                 .fontWeight(.bold)
                             
@@ -385,7 +394,7 @@ struct CreatorDetailView: View {
                                     .fontWeight(.semibold)
                                 }
                                 
-                                Text(creator.subscriptionTier.uppercased())
+                                Text((creator.subscriptionTier ?? "free").uppercased())
                                     .font(.caption)
                                     .fontWeight(.semibold)
                                     .padding(.horizontal, 8)
@@ -413,13 +422,13 @@ struct CreatorDetailView: View {
                     
                     statCard(
                         title: "Pricing",
-                        value: "$\(creator.pricingPerPost, specifier: "%.0f")",
+                        value: "$\(creator.pricingPerPost ?? 0, specifier: "%.0f")",
                         icon: "dollarsign.circle.fill"
                     )
                     
                     statCard(
                         title: "Earnings",
-                        value: "$\(creator.totalEarnings, specifier: "%.0f")",
+                        value: "$\(creator.totalEarnings ?? 0, specifier: "%.0f")",
                         icon: "banknote.fill"
                     )
                 }
@@ -443,7 +452,7 @@ struct CreatorDetailView: View {
                         .font(.headline)
                     
                     VStack(spacing: 8) {
-                        ForEach(creator.socialPlatforms) { platform in
+                        ForEach(creator.socialPlatforms ?? []) { platform in
                             platformCard(platform)
                         }
                     }
@@ -544,7 +553,7 @@ struct CreatorDetailView: View {
     }
     
     private var subscriptionColor: Color {
-        switch creator.subscriptionTier {
+        switch creator.subscriptionTier ?? "free" {
         case "pro":
             return .blue
         case "premium":
@@ -558,3 +567,4 @@ struct CreatorDetailView: View {
 #Preview {
     CreatorSearchView()
 }
+

@@ -1,4 +1,4 @@
-﻿import SwiftUI
+import SwiftUI
 
 // MARK: - Create Campaign View
 struct CreateCampaignView: View {
@@ -6,7 +6,13 @@ struct CreateCampaignView: View {
     @State private var requirements = ""
     @State private var budgetPerVideo = ""
     @State private var deadline = Date()
+    @State private var location = ""
+    @State private var niche: NicheType? = nil
+    @State private var requiredFollowers = ""
+    @State private var isSubmitting = false
+    @State private var errorMessage: String?
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject private var session: SessionManager
 
     var body: some View {
         ZStack {
@@ -93,6 +99,32 @@ struct CreateCampaignView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
+                Text("Location")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(AppTheme.text900)
+                TextField("City or region", text: $location)
+                    .font(.system(size: 14, weight: .regular))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppTheme.slate200, lineWidth: 1))
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Niche")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(AppTheme.text900)
+                Picker("Select Niche", selection: $niche) {
+                    Text("Select").tag(nil as NicheType?)
+                    ForEach(NicheType.allCases, id: \.self) { niche in
+                        Text(niche.displayName).tag(niche as NicheType?)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
                 Text("Requirements")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(AppTheme.text900)
@@ -141,6 +173,20 @@ struct CreateCampaignView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
+                Text("Required Followers")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(AppTheme.text900)
+                TextField("Minimum followers", text: $requiredFollowers)
+                    .keyboardType(.numberPad)
+                    .font(.system(size: 14, weight: .regular))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppTheme.slate200, lineWidth: 1))
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
                 Text("Campaign Banner (Optional)")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(AppTheme.text900)
@@ -165,6 +211,12 @@ struct CreateCampaignView: View {
                 )
                 .cornerRadius(12)
             }
+
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(AppTheme.errorRed)
+            }
         }
         .padding(16)
         .background(Color.white)
@@ -185,8 +237,8 @@ struct CreateCampaignView: View {
                     .cornerRadius(10)
             }
 
-            Button(action: {}) {
-                Text("Next Step")
+            Button(action: { submit() }) {
+                Text(isSubmitting ? "Publishing..." : "Publish Campaign")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -194,10 +246,44 @@ struct CreateCampaignView: View {
                     .background(AppTheme.primary)
                     .cornerRadius(10)
             }
+            .disabled(isSubmitting)
         }
         .padding(16)
         .background(Color.white)
         .overlay(Divider(), alignment: .top)
+    }
+
+    private func submit() {
+        guard let budget = Double(budgetPerVideo), let requiredFol = Int(requiredFollowers), let selectedNiche = niche else {
+            errorMessage = "Please fill in all required fields logically."
+            return
+        }
+        
+        isSubmitting = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                let request = CampaignCreateRequest(
+                    title: campaignTitle,
+                    description: requirements,
+                    niche: selectedNiche,
+                    budget: budget,
+                    location: location,
+                    requiredFollowers: requiredFol,
+                    deliverables: requirements,
+                    deadline: deadline
+                )
+                
+                _ = try await session.apiService.createCampaign(request)
+                
+                isSubmitting = false
+                dismiss() // Pop back to home
+            } catch {
+                errorMessage = error.localizedDescription
+                isSubmitting = false
+            }
+        }
     }
 }
 

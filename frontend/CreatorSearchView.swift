@@ -1,7 +1,7 @@
 ﻿import SwiftUI
 
 // MARK: - Creator Search View (Brand Discovery)
-struct CreatorSearchView: View {
+struct CreatorSearchMarketingView: View {
     @State private var searchText = "Real Estate Dubai"
     @Environment(\.dismiss) var dismiss
 
@@ -380,5 +380,5 @@ struct SearchBottomNavItem: View {
 }
 
 #Preview {
-    CreatorSearchView()
+    CreatorSearchMarketingView()
 }

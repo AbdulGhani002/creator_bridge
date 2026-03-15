@@ -332,6 +332,7 @@ struct CampaignFilterView: View {
 struct CampaignDetailView: View {
     let campaign: Campaign
     @Environment(\.dismiss) var dismiss
+    @State private var showApplyForm = false
     
     var body: some View {
         ScrollView {
@@ -413,7 +414,7 @@ struct CampaignDetailView: View {
                 
                 // CTA Button
                 if !campaign.isDeadlinePassed && campaign.status == .open {
-                    Button(action: {}) {
+                    Button(action: { showApplyForm = true }) {
                         Text("Apply Now")
                             .frame(maxWidth: .infinity)
                             .padding(12)
@@ -430,6 +431,9 @@ struct CampaignDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemBackground))
+        .sheet(isPresented: $showApplyForm) {
+            ApplicationFormView(campaignId: campaign.id)
+        }
     }
 }
 
