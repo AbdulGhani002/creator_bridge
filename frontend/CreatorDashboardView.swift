@@ -1,4 +1,4 @@
-﻿import SwiftUI
+import SwiftUI
 
 struct CreatorDashboardView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -182,7 +182,7 @@ struct CreatorDashboardView: View {
         .padding(.horizontal, 12)
         .padding(.top, 10)
         .padding(.bottom, 20)
-        .background(Color.white.opacity(0.95))
+        .background(Material.bar)           // adaptive: white light / slate-900 dark
         .overlay(Divider(), alignment: .top)
     }
 }
@@ -250,7 +250,7 @@ struct StatPrimaryCard: View {
                     .foregroundColor(.white)
                 Text(delta)
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(Color.white.opacity(0.8))
+                    .foregroundColor(AppTheme.emeraldLight) // matches Stitch text-emerald-300
             }
 
             GeometryReader { geometry in

@@ -1,4 +1,4 @@
-﻿import SwiftUI
+import SwiftUI
 
 // MARK: - Creator Search View (Brand Discovery)
 struct CreatorSearchMarketingView: View {
@@ -126,6 +126,7 @@ struct CreatorSearchMarketingView: View {
     private var filterChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
+                // Active filter chip (Dubai location) — primary bg, white text, Stitch style
                 HStack(spacing: 6) {
                     Image(systemName: "mappin.circle.fill")
                         .font(.system(size: 12, weight: .semibold))
@@ -140,6 +141,7 @@ struct CreatorSearchMarketingView: View {
                 .foregroundColor(.white)
                 .cornerRadius(20)
 
+                // Inactive chip — slate-100 bg, border, slate-700 text
                 HStack(spacing: 6) {
                     Text("Real Estate")
                         .font(.system(size: 12, weight: .semibold))
@@ -151,6 +153,7 @@ struct CreatorSearchMarketingView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(AppTheme.slate100)
+                .overlay(RoundedRectangle(cornerRadius: 20).stroke(AppTheme.slate200, lineWidth: 1))
                 .cornerRadius(20)
 
                 HStack(spacing: 6) {
@@ -164,6 +167,7 @@ struct CreatorSearchMarketingView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(AppTheme.slate100)
+                .overlay(RoundedRectangle(cornerRadius: 20).stroke(AppTheme.slate200, lineWidth: 1))
                 .cornerRadius(20)
             }
             .padding(.horizontal, 16)
@@ -228,7 +232,7 @@ struct CreatorSearchMarketingView: View {
         .padding(.horizontal, 12)
         .padding(.top, 8)
         .padding(.bottom, 20)
-        .background(Color.white.opacity(0.95))
+        .background(Material.bar)   // adaptive dark-mode bottom nav
         .overlay(Divider(), alignment: .top)
     }
 }

@@ -240,11 +240,11 @@ struct CreatorRowView: View {
     private var subscriptionColor: Color {
         switch creator.subscriptionTier ?? "free" {
         case "pro":
-            return .blue
+            return AppTheme.primary
         case "premium":
-            return .purple
+            return AppTheme.primaryDark
         default:
-            return .gray
+            return AppTheme.slate400
         }
     }
     
@@ -269,8 +269,8 @@ struct CreatorRowView: View {
             .font(.caption2)
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
-            .background(Color.blue.opacity(0.1))
-            .foregroundStyle(.blue)
+            .background(AppTheme.primary.opacity(0.1))
+            .foregroundStyle(AppTheme.primary)
             .cornerRadius(4)
     }
 }
@@ -489,7 +489,7 @@ struct CreatorDetailView: View {
                         .fontWeight(.semibold)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.blue)
+                .tint(AppTheme.primary)
                 
                 Spacer()
             }
@@ -556,11 +556,11 @@ struct CreatorDetailView: View {
     private var subscriptionColor: Color {
         switch creator.subscriptionTier ?? "free" {
         case "pro":
-            return .blue
+            return AppTheme.primary
         case "premium":
-            return .purple
+            return AppTheme.primaryDark
         default:
-            return .gray
+            return AppTheme.slate400
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿import SwiftUI
+import SwiftUI
 
 // MARK: - Messages Chat View
 struct MessagesChatView: View {
@@ -350,12 +350,7 @@ struct RoundedCorner: Shape {
     }
 }
 
-// MARK: - Backdrop Modifier
-extension View {
-    func backdrop() -> some View {
-        self.background(Material.ultraThin)
-    }
-}
+// backdrop() is globally defined in Theme.swift
 
 #Preview {
     MessagesChatView()

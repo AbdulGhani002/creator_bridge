@@ -1,4 +1,4 @@
-﻿import SwiftUI
+import SwiftUI
 
 // MARK: - Settings & Earnings View
 struct SettingsEarningsView: View {
@@ -243,7 +243,7 @@ struct SettingsEarningsView: View {
         .padding(.horizontal, 12)
         .padding(.top, 8)
         .padding(.bottom, 20)
-        .background(Color.white.opacity(0.95))
+        .background(Material.bar)
         .overlay(Divider(), alignment: .top)
     }
 }

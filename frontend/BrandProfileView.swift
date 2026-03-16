@@ -1,4 +1,4 @@
-﻿import SwiftUI
+import SwiftUI
 
 // MARK: - Brand Profile View
 struct BrandProfileView: View {
@@ -267,6 +267,7 @@ struct BrandProfileView: View {
             BrandBottomNavItem(icon: "house", title: "Home", active: false)
             BrandBottomNavItem(icon: "safari", title: "Explore", active: false)
 
+            // Central FAB — Stitch uses rounded-2xl square shape
             ZStack {
                 RoundedRectangle(cornerRadius: 14)
                     .fill(AppTheme.primary)
@@ -284,7 +285,7 @@ struct BrandProfileView: View {
         .padding(.horizontal, 12)
         .padding(.top, 8)
         .padding(.bottom, 20)
-        .background(Color.white.opacity(0.95))
+        .background(Material.bar)   // adaptive — white in light, dark in dark mode
         .overlay(Divider(), alignment: .top)
     }
 }
