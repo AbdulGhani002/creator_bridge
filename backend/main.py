@@ -57,6 +57,7 @@ app.add_middleware(
         "http://localhost",
         "null" 
     ],
+    allow_origin_regex=r"http://localhost:\d+", # Support all localhost ports for dev
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -82,6 +83,16 @@ async def logging_middleware(request: Request, call_next):
 
 # MARK: - Error Handlers
 
+def _cors_response(request: Request, response: JSONResponse) -> JSONResponse:
+    """Add CORS headers to error responses when allow_credentials=True"""
+    origin = request.headers.get("origin")
+    if origin:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Handle HTTP exceptions"""
@@ -93,8 +104,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             "status_code": exc.status_code
         }
     )
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    return response
+    return _cors_response(request, response)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -107,8 +117,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "errors": [{"field": e["loc"][-1], "message": e["msg"]} for e in exc.errors()]
         }
     )
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    return response
+    return _cors_response(request, response)
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
@@ -121,8 +130,7 @@ async def general_exception_handler(request: Request, exc: Exception):
             "message": f"Internal server error: {str(exc)}"
         }
     )
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    return response
+    return _cors_response(request, response)
 
 # MARK: - Route Registration
 
@@ -142,9 +150,7 @@ app.include_router(subscriptions.router, prefix="/api/v1")
 app.include_router(analytics.router, prefix="/api/v1")
 app.include_router(payments.router, prefix="/api/v1")
 
-# MARK: - Health Check Endpoints
-
-@app.get("/health", tags=["health"])
+@app.get("/api/v1/health", tags=["health"])
 async def health_check():
     """Health check endpoint"""
     return {
