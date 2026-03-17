@@ -1,7 +1,7 @@
 ﻿from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from typing import Optional, List
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from database import get_database
@@ -37,7 +37,7 @@ class CampaignService:
 
     async def create_campaign(self, campaign: CampaignCreate) -> str:
         campaign_dict = campaign.dict()
-        campaign_dict["created_at"] = datetime.utcnow()
+        campaign_dict["created_at"] = datetime.now(timezone.utc)
         campaign_dict["status"] = campaign_dict.get("status", "open") or "open"
         campaign_dict["applications_count"] = campaign_dict.get("applications_count", 0)
         result = await self.collection.insert_one(campaign_dict)

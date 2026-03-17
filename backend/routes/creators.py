@@ -1,7 +1,7 @@
 ﻿from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from typing import Optional, List
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from database import get_database
@@ -54,7 +54,7 @@ class CreatorService:
 
     async def create_creator_profile(self, creator: CreatorProfile) -> str:
         creator_dict = creator.dict()
-        creator_dict["created_at"] = datetime.utcnow()
+        creator_dict["created_at"] = datetime.now(timezone.utc)
         creator_dict["verified"] = creator_dict.get("verified", False)
         result = await self.creators_collection.insert_one(creator_dict)
         return str(result.inserted_id)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Literal
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -72,7 +72,7 @@ async def signup(payload: SignupRequest, db: AsyncIOMotorDatabase = Depends(get_
         "password_hash": hash_password(payload.password),
         "role": payload.role,
         "location": payload.location,
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
         "updated_at": None,
         "is_active": True,
     }
@@ -89,7 +89,7 @@ async def signup(payload: SignupRequest, db: AsyncIOMotorDatabase = Depends(get_
         creator_data.update({
             "user_id": user_id,
             "subscription_tier": "free",
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
             "rating": None,
             "verified": False
         })
@@ -101,7 +101,7 @@ async def signup(payload: SignupRequest, db: AsyncIOMotorDatabase = Depends(get_
         }
         brand_data.update({
             "user_id": user_id,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
             "verified": False
         })
         await db.brands.insert_one(brand_data)
@@ -134,7 +134,7 @@ async def demo_user(
     role: Literal["creator", "brand"] = "creator",
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     email = f"demo+{role}+{timestamp}@creatorbridge.com"
     password = "DemoPass1"
     user_doc = {
@@ -143,7 +143,7 @@ async def demo_user(
         "password_hash": hash_password(password),
         "role": role,
         "location": "Demo City",
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
         "updated_at": None,
         "is_active": True,
     }
@@ -159,7 +159,7 @@ async def demo_user(
             "followers_count": 12000,
             "subscription_tier": "pro",
             "pricing_per_post": 250,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
             "verified": False
         })
     else:
@@ -170,7 +170,7 @@ async def demo_user(
             "company_website": "https://example.com",
             "company_description": "Demo brand account for review/testing.",
             "location": "Demo City",
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
             "verified": False
         })
 

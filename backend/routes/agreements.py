@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from pydantic import BaseModel, Field
 from typing import Optional, Literal
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -52,7 +52,7 @@ async def create_agreement(
     agreement_doc.update({
         "brand_id": current_user.get("id"),
         "status": "sent",
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
         "updated_at": None
     })
 
@@ -117,7 +117,7 @@ async def update_agreement(
         raise HTTPException(status_code=403, detail="Not authorized")
 
     update_data = payload.dict(exclude_unset=True)
-    update_data["updated_at"] = datetime.utcnow()
+    update_data["updated_at"] = datetime.now(timezone.utc)
     result = await db.agreements.update_one({"_id": agreement_obj_id}, {"$set": update_data})
     if result.modified_count == 0:
         raise HTTPException(status_code=400, detail="No changes applied")

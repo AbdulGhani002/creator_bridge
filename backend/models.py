@@ -3,7 +3,7 @@ Pydantic models for User, Creator, Brand, Campaign, and related schemas
 """
 from pydantic import BaseModel, Field, EmailStr, validator
 from typing import List, Optional, Enum
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum as PyEnum
 from bson import ObjectId
 
@@ -80,7 +80,7 @@ class UserBase(BaseModel):
     email: EmailStr
     role: UserRole
     location: str = Field(..., min_length=1, max_length=100)
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    created_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class UserCreate(UserBase):
@@ -137,7 +137,7 @@ class CreatorProfileResponse(CreatorBase):
     subscription_tier: str = Field(default="free")  # free, pro, premium
     total_earnings: float = Field(default=0)
     rating: Optional[float] = Field(None, ge=0, le=5)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Config:
         populate_by_name = True
@@ -164,7 +164,7 @@ class BrandProfileResponse(BrandProfileBase):
     id: PyObjectId = Field(alias="_id")
     user_id: PyObjectId
     verified: bool = Field(default=False)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Config:
         populate_by_name = True
@@ -196,7 +196,7 @@ class CampaignResponse(CampaignBase):
     brand_id: PyObjectId
     status: CampaignStatus = Field(default=CampaignStatus.OPEN)
     applications_count: int = Field(default=0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
 
     class Config:
@@ -231,7 +231,7 @@ class ApplicationResponse(BaseModel):
     creator_id: PyObjectId
     proposal: str
     status: ApplicationStatus = Field(default=ApplicationStatus.PENDING)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Config:
         populate_by_name = True

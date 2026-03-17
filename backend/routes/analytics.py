@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from datetime import datetime
+from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from database import get_database
@@ -35,7 +35,7 @@ async def creator_analytics(
         "agreements": agreements,
         "completed_agreements": completed,
         "total_earnings": total_earnings,
-        "updated_at": datetime.utcnow().isoformat()
+        "updated_at": datetime.now(timezone.utc).isoformat()
     }
 
 
@@ -60,6 +60,6 @@ async def brand_analytics(
         "accepted_applications": accepted,
         "agreements": agreements,
         "completed_agreements": completed,
-        "updated_at": datetime.utcnow().isoformat()
+        "updated_at": datetime.now(timezone.utc).isoformat()
     }
 

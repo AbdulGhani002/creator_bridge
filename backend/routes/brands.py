@@ -1,7 +1,7 @@
 ﻿from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from typing import Optional, List
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from database import get_database
@@ -40,7 +40,7 @@ class BrandService:
 
     async def create_brand(self, brand: BrandProfile) -> str:
         brand_dict = brand.dict()
-        brand_dict["created_at"] = datetime.utcnow()
+        brand_dict["created_at"] = datetime.now(timezone.utc)
         result = await self.collection.insert_one(brand_dict)
         return str(result.inserted_id)
 

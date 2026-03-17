@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from pydantic import BaseModel, Field
 from typing import Optional, Literal
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -62,7 +62,7 @@ async def create_application(
         "brand_id": campaign.get("brand_id"),
         "proposal": payload.proposal,
         "status": "pending",
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
         "updated_at": None
     }
     result = await db.applications.insert_one(application_doc)
@@ -127,7 +127,7 @@ async def update_application_status(
         raise HTTPException(status_code=403, detail="Brands cannot withdraw applications")
 
     update = {
-        "$set": {"status": payload.status, "updated_at": datetime.utcnow()}
+        "$set": {"status": payload.status, "updated_at": datetime.now(timezone.utc)}
     }
 
     try:

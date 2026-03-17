@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Path
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from database import get_database
@@ -41,7 +41,7 @@ async def block_user(
     block_doc = {
         "blocker_id": current_user.get("id"),
         "blocked_id": payload.blocked_id,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.now(timezone.utc)
     }
     result = await db.blocks.insert_one(block_doc)
     return {"id": str(result.inserted_id), "status": "success", "message": "User blocked"}
