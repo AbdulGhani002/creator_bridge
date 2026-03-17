@@ -79,7 +79,7 @@ struct SubscriptionPlansView: View {
                     Color.black.opacity(0.4).ignoresSafeArea()
                     ProgressView("Processing...")
                         .padding()
-                        .background(Color.white)
+                        .background(Color.scardBg)
                         .cornerRadius(10)
                 }
             }
@@ -102,7 +102,7 @@ struct SubscriptionPlansView: View {
                     .foregroundColor(AppTheme.primary)
                 Text("CreatorFlow")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(Color.stext)
             }
 
             Spacer()
@@ -122,7 +122,7 @@ struct SubscriptionPlansView: View {
             Text("Choose your creator journey")
                 .font(.system(size: 26, weight: .bold))
                 .multilineTextAlignment(.center)
-                .foregroundColor(AppTheme.text900)
+                .foregroundColor(Color.stext)
 
             Text("Boost your visibility and grow your audience with professional tools designed for scaling creators.")
                 .font(.system(size: 14, weight: .regular))
@@ -179,7 +179,7 @@ struct SubscriptionPlansView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Unlock Maximum Visibility")
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(AppTheme.text900)
+                .foregroundColor(Color.stext)
 
             Text("Creators on our Pro and Premium plans see an average of 4x more engagement. Our algorithm prioritizes premium content, placing you directly in front of active explorers.")
                 .font(.system(size: 12, weight: .regular))
@@ -253,7 +253,7 @@ struct PlanCardView: View {
 
             Text(plan.name)
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(AppTheme.text900)
+                .foregroundColor(Color.stext)
 
             Text(plan.description)
                 .font(.system(size: 12, weight: .regular))
@@ -262,7 +262,7 @@ struct PlanCardView: View {
             HStack(alignment: .lastTextBaseline, spacing: 4) {
                 Text(plan.price)
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(Color.stext)
                 Text("/mo")
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(AppTheme.text500)
@@ -303,7 +303,7 @@ struct PlanCardView: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color.scardBg)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
@@ -332,7 +332,7 @@ struct VisibilityRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(Color.stext)
                 Text(subtitle)
                     .font(.system(size: 11, weight: .regular))
                     .foregroundColor(AppTheme.text500)
@@ -383,7 +383,7 @@ struct VisibilityCard: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color.scardBg)
         .cornerRadius(16)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.primary.opacity(0.1), lineWidth: 1))
     }

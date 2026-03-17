@@ -13,6 +13,7 @@ enum NetworkError: LocalizedError {
     case unauthorized
     case notFound
     case badRequest(String)
+    case invalidSSL
     case unknown
     
     var errorDescription: String? {
@@ -35,6 +36,8 @@ enum NetworkError: LocalizedError {
             return "Resource not found"
         case .badRequest(let message):
             return "Bad request: \(message)"
+        case .invalidSSL:
+            return "Invalid SSL Certificate (526). If using Cloudflare Tunnel, check SSL settings."
         case .unknown:
             return "An unknown error occurred"
         }
@@ -548,6 +551,8 @@ public class APIService {
             throw NetworkError.unauthorized
         case 404:
             throw NetworkError.notFound
+        case 526:
+            throw NetworkError.invalidSSL
         case 500...599:
             throw NetworkError.serverError(
                 httpResponse.statusCode,

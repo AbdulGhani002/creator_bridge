@@ -79,25 +79,32 @@ async def signup(payload: SignupRequest, db: AsyncIOMotorDatabase = Depends(get_
     result = await db.users.insert_one(user_doc)
     user_id = str(result.inserted_id)
 
-    # Optional profile creation
-    if payload.role == "creator" and payload.creator_profile:
-        creator_doc = payload.creator_profile.dict()
-        creator_doc.update({
+    # Profile creation (ensure profile exists)
+    if payload.role == "creator":
+        creator_data = payload.creator_profile.dict() if payload.creator_profile else {
+            "name": payload.name,
+            "bio": "",
+            "location": payload.location
+        }
+        creator_data.update({
             "user_id": user_id,
             "subscription_tier": "free",
             "created_at": datetime.utcnow(),
             "rating": None,
             "verified": False
         })
-        await db.creators.insert_one(creator_doc)
-    if payload.role == "brand" and payload.brand_profile:
-        brand_doc = payload.brand_profile.dict()
-        brand_doc.update({
+        await db.creators.insert_one(creator_data)
+    elif payload.role == "brand":
+        brand_data = payload.brand_profile.dict() if payload.brand_profile else {
+            "company_name": payload.name,
+            "location": payload.location
+        }
+        brand_data.update({
             "user_id": user_id,
             "created_at": datetime.utcnow(),
             "verified": False
         })
-        await db.brands.insert_one(brand_doc)
+        await db.brands.insert_one(brand_data)
 
     token = create_access_token({"sub": user_id, "role": payload.role})
     user_doc["_id"] = user_id

@@ -7,7 +7,7 @@ struct BrandProfileView: View {
 
     var body: some View {
         ZStack {
-            AppTheme.backgroundLight.ignoresSafeArea()
+            Color.sbg.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header
@@ -40,7 +40,7 @@ struct BrandProfileView: View {
             Button(action: { dismiss() }) {
                 Image(systemName: "arrow.left")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
                     .frame(width: 32, height: 32)
             }
 
@@ -48,20 +48,20 @@ struct BrandProfileView: View {
 
             Text("DubaiLuxuryHomes")
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(AppTheme.text900)
+                .foregroundColor(.stext)
 
             Spacer()
 
             Button(action: {}) {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
                     .frame(width: 32, height: 32)
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.white.opacity(0.9))
+        .background(Color.scardBg.opacity(0.9))
         .backdrop()
     }
 
@@ -91,7 +91,7 @@ struct BrandProfileView: View {
             VStack(spacing: 6) {
                 Text("DubaiLuxuryHomes")
                     .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
 
                 HStack(spacing: 6) {
                     Image(systemName: "building.2.fill")

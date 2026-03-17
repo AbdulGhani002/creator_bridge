@@ -16,7 +16,7 @@ struct LandingPageView: View {
                     footerSection
                 }
             }
-            .background(colorScheme == .dark ? AppTheme.backgroundDark : AppTheme.backgroundLight)
+            .background(Color.sbg)
             .navigationBarHidden(true)
         }
     }
@@ -38,7 +38,7 @@ struct LandingPageView: View {
 
                 Text("CreatorBridge")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
             }
 
             Spacer()
@@ -81,7 +81,7 @@ struct LandingPageView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
-        .background(colorScheme == .dark ? AppTheme.backgroundDark.opacity(0.9) : Color.white.opacity(0.95))
+        .background(Color.sbg.opacity(0.95))
         .overlay(Divider(), alignment: .bottom)
     }
 
@@ -99,11 +99,11 @@ struct LandingPageView: View {
                     .cornerRadius(20)
 
                 (Text("Bridge the Gap Between ")
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
                  + Text("Brands")
                     .foregroundColor(AppTheme.primary)
                  + Text(" and ")
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
                  + Text("Local Creators.")
                     .foregroundColor(AppTheme.primary))
                     .font(.system(size: 34, weight: .black))
@@ -130,10 +130,10 @@ struct LandingPageView: View {
                 Button(action: {}) {
                     Text("I am a Brand")
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(AppTheme.text900)
+                        .foregroundColor(.stext)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(colorScheme == .dark ? AppTheme.slate800 : Color.white)
+                        .background(Color.scardBg)
                         .overlay(
                             RoundedRectangle(cornerRadius: 14)
                                 .stroke(AppTheme.slate200, lineWidth: 1)
@@ -145,7 +145,7 @@ struct LandingPageView: View {
 
             ZStack {
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(AppTheme.slate100)
+                    .fill(Color.sbg)
                     .shadow(color: AppTheme.shadowLg, radius: 16, x: 0, y: 10)
 
                 AsyncImage(url: URL(string: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEQxOThrnqMd1dfa5zTws2ZumGPYh0VLQTSdbbSVX0MzqpgXNv5pBFYd99O7kbKTGPZz0697SlCYsYCSGWQrK381F-jMx4lsWAvQ2lbIIvaFWcGrU-gHi9qXtrnQqynPyK_rVx7MH8r8xwAD2QqjgiNMOWY1rcWv3yT3OeoNCarlA2M1s-mu-0V5Uky4AoWPI5XP4vyQi0w6JP3jdfiMqs7NWe6sXAeDm9N3ZIW78IStpj76vRAka8_o1DLDYHXB7KltBhNXwFox8")) { image in
@@ -177,7 +177,7 @@ struct LandingPageView: View {
         VStack(spacing: 20) {
             Text("Discovery by Location")
                 .font(.system(size: 24, weight: .black))
-                .foregroundColor(AppTheme.text900)
+                .foregroundColor(.stext)
 
             Text("Find the perfect creative partner right in your neighborhood. Our map-based discovery tool ensures relevance and local authenticity for every campaign.")
                 .font(.system(size: 14, weight: .regular))
@@ -211,14 +211,14 @@ struct LandingPageView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Brooklyn, NY")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(AppTheme.text900)
+                            .foregroundColor(.stext)
                         Text("124 active creators found")
                             .font(.system(size: 10, weight: .regular))
                             .foregroundColor(AppTheme.text500)
                     }
                 }
                 .padding(12)
-                .background(Color.white.opacity(0.9))
+                .background(Color.scardBg.opacity(0.9))
                 .cornerRadius(12)
                 .padding(12)
             }
@@ -244,7 +244,7 @@ struct LandingPageView: View {
             .padding(.horizontal, 20)
         }
         .padding(.vertical, 28)
-        .background(Color.white)
+        .background(Color.scardBg)
     }
 
     // MARK: - How It Works
@@ -253,7 +253,7 @@ struct LandingPageView: View {
         VStack(spacing: 20) {
             Text("How it Works")
                 .font(.system(size: 24, weight: .black))
-                .foregroundColor(AppTheme.text900)
+                .foregroundColor(.stext)
 
             Text("Get your campaign running in minutes with our streamlined collaboration process.")
                 .font(.system(size: 14, weight: .regular))
@@ -269,7 +269,7 @@ struct LandingPageView: View {
             .padding(.horizontal, 20)
         }
         .padding(.vertical, 28)
-        .background(colorScheme == .dark ? AppTheme.backgroundDark : AppTheme.backgroundLight)
+        .background(Color.sbg)
     }
 
     // MARK: - Top Categories
@@ -280,7 +280,7 @@ struct LandingPageView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Top Categories")
                         .font(.system(size: 22, weight: .black))
-                        .foregroundColor(AppTheme.text900)
+                        .foregroundColor(.stext)
                     Text("Explore the most active niches in our marketplace.")
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(AppTheme.text600)
@@ -321,7 +321,7 @@ struct LandingPageView: View {
             .padding(.horizontal, 20)
         }
         .padding(.vertical, 24)
-        .background(Color.white)
+        .background(Color.scardBg)
     }
 
     // MARK: - CTA
@@ -418,7 +418,7 @@ struct DiscoveryFeatureRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
                 Text(description)
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(AppTheme.text600)
@@ -438,7 +438,7 @@ struct HowItWorksCard: View {
         VStack(spacing: 12) {
             ZStack {
                 Circle()
-                    .fill(Color.white)
+                    .fill(Color.scardBg)
                     .frame(width: 64, height: 64)
                     .overlay(Circle().stroke(AppTheme.primary.opacity(0.2), lineWidth: 3))
 
@@ -449,7 +449,7 @@ struct HowItWorksCard: View {
 
             Text(title)
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(AppTheme.text900)
+                .foregroundColor(.stext)
 
             Text(description)
                 .font(.system(size: 12, weight: .regular))
@@ -458,7 +458,7 @@ struct HowItWorksCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity)
-        .background(colorScheme == .dark ? AppTheme.slate900 : Color.white)
+        .background(Color.scardBg)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)

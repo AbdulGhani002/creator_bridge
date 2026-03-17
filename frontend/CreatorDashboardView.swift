@@ -6,7 +6,7 @@ struct CreatorDashboardView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppTheme.backgroundLight.ignoresSafeArea()
+                Color.sbg.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     header
@@ -43,7 +43,7 @@ struct CreatorDashboardView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Alex Rivera")
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
 
                 Text("Professional Creator")
                     .font(.system(size: 11, weight: .regular))
@@ -57,12 +57,12 @@ struct CreatorDashboardView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(AppTheme.text600)
                     .frame(width: 36, height: 36)
-                    .background(AppTheme.slate100)
+                    .background(Color.sbg)
                     .cornerRadius(18)
             }
         }
         .padding(16)
-        .background(colorScheme == .dark ? AppTheme.slate900 : Color.white)
+        .background(Color.scardBg)
         .overlay(Divider(), alignment: .bottom)
     }
 
@@ -106,7 +106,7 @@ struct CreatorDashboardView: View {
             HStack {
                 Text("New Opportunities")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
                 Spacer()
                 Button("View all") {}
                     .font(.system(size: 12, weight: .semibold))
@@ -141,7 +141,7 @@ struct CreatorDashboardView: View {
             HStack {
                 Text("Recent Messages")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
                 Spacer()
                 Button(action: {}) {
                     Image(systemName: "ellipsis")
@@ -213,11 +213,11 @@ struct StatMiniCard: View {
 
             Text(value)
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(AppTheme.text900)
+                .foregroundColor(.stext)
         }
         .padding(14)
         .frame(maxWidth: .infinity)
-        .background(Color.white)
+        .background(Color.scardBg)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -307,12 +307,12 @@ struct OpportunityCard: View {
 
                     Text(price)
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(AppTheme.text900)
+                        .foregroundColor(.stext)
                 }
 
                 Text(title)
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(AppTheme.text900)
+                    .foregroundColor(.stext)
 
                 Text(description)
                     .font(.system(size: 11, weight: .regular))
@@ -325,7 +325,7 @@ struct OpportunityCard: View {
                         .foregroundColor(filledCTA ? .white : AppTheme.primary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
-                        .background(filledCTA ? AppTheme.primary : Color.white)
+                        .background(filledCTA ? AppTheme.primary : Color.scardBg)
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(filledCTA ? Color.clear : AppTheme.primary, lineWidth: 1)
@@ -334,7 +334,7 @@ struct OpportunityCard: View {
                 }
             }
             .padding(12)
-            .background(Color.white)
+            .background(Color.scardBg)
         }
         .cornerRadius(12)
         .overlay(
@@ -375,7 +375,7 @@ struct MessageRow: View {
                 HStack {
                     Text(name)
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(AppTheme.text900)
+                        .foregroundColor(.stext)
                     Spacer()
                     Text(time)
                         .font(.system(size: 9, weight: .regular))
@@ -389,7 +389,7 @@ struct MessageRow: View {
             }
         }
         .padding(12)
-        .background(highlighted ? Color.white : Color.white.opacity(0.8))
+        .background(highlighted ? Color.scardBg : Color.scardBg.opacity(0.8))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)

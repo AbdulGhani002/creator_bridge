@@ -13,24 +13,8 @@ from bson.errors import InvalidId
 from database import Database, get_database
 
 # Import routes
-try:
-    from routes import campaigns, creators, brands, messages, plans
-    from routes import auth, applications, agreements, reviews, reports, blocks, subscriptions, analytics
-except ImportError:
-    # Fallback if routes not available
-    campaigns = None
-    creators = None
-    brands = None
-    messages = None
-    plans = None
-    auth = None
-    applications = None
-    agreements = None
-    reviews = None
-    reports = None
-    blocks = None
-    subscriptions = None
-    analytics = None
+from routes import campaigns, creators, brands, messages, plans
+from routes import auth, applications, agreements, reviews, reports, blocks, subscriptions, analytics
 
 # Load environment variables
 load_dotenv()
@@ -131,172 +115,19 @@ async def general_exception_handler(request: Request, exc: Exception):
 # MARK: - Route Registration
 
 # Include modular routes with /api/v1 prefix
-if campaigns and hasattr(campaigns, 'router'):
-    app.include_router(campaigns.router, prefix="/api/v1")
-if creators and hasattr(creators, 'router'):
-    app.include_router(creators.router, prefix="/api/v1")
-if brands and hasattr(brands, 'router'):
-    app.include_router(brands.router, prefix="/api/v1")
-if messages and hasattr(messages, 'router'):
-    app.include_router(messages.router, prefix="/api/v1")
-if plans and hasattr(plans, 'router'):
-    app.include_router(plans.router, prefix="/api/v1")
-if auth and hasattr(auth, 'router'):
-    app.include_router(auth.router, prefix="/api/v1")
-if applications and hasattr(applications, 'router'):
-    app.include_router(applications.router, prefix="/api/v1")
-if agreements and hasattr(agreements, 'router'):
-    app.include_router(agreements.router, prefix="/api/v1")
-if reviews and hasattr(reviews, 'router'):
-    app.include_router(reviews.router, prefix="/api/v1")
-if reports and hasattr(reports, 'router'):
-    app.include_router(reports.router, prefix="/api/v1")
-if blocks and hasattr(blocks, 'router'):
-    app.include_router(blocks.router, prefix="/api/v1")
-if subscriptions and hasattr(subscriptions, 'router'):
-    app.include_router(subscriptions.router, prefix="/api/v1")
-if analytics and hasattr(analytics, 'router'):
-    app.include_router(analytics.router, prefix="/api/v1")
-
-# Direct simple API routes (fallback if service routes fail to load)
-
-@app.get("/api/v1/creators", tags=["creators"])
-async def list_creators_simple(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
-    q: str = Query(None),
-    niche: str = Query(None),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """
-    List all creators with optional search and filtering
-    """
-    try:
-        filter_dict = {}
-        if q:
-            filter_dict["$or"] = [
-                {"name": {"$regex": q, "$options": "i"}},
-                {"bio": {"$regex": q, "$options": "i"}}
-            ]
-        if niche:
-            filter_dict["niches"] = {"$in": [niche]}
-        
-        creators = await db.creators.find(filter_dict).skip(skip).limit(limit).to_list(length=limit)
-        
-        # Convert ObjectId to string
-        for creator in creators:
-            creator['_id'] = str(creator.get('_id', ''))
-        
-        return creators
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/v1/creators/{creator_id}", tags=["creators"])
-async def get_creator_simple(
-    creator_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """
-    Get creator by ID
-    """
-    try:
-        try:
-            creator_object_id = ObjectId(creator_id)
-        except InvalidId:
-            raise HTTPException(status_code=400, detail="Invalid creator id")
-
-        creator = await db.creators.find_one({"_id": creator_object_id})
-        if not creator:
-            raise HTTPException(status_code=404, detail="Creator not found")
-        
-        creator['_id'] = str(creator.get('_id', ''))
-        return creator
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/v1/creators/{creator_id}/stats", tags=["creators"])
-async def get_creator_stats_simple(
-    creator_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """
-    Get creator statistics
-    """
-    try:
-        try:
-            creator_object_id = ObjectId(creator_id)
-        except InvalidId:
-            raise HTTPException(status_code=400, detail="Invalid creator id")
-
-        creator = await db.creators.find_one({"_id": creator_object_id})
-        if not creator:
-            raise HTTPException(status_code=404, detail="Creator not found")
-        
-        return {
-            "total_views": creator.get('monthly_reach', 0),
-            "total_engagements": int(creator.get('followers', 0) * (creator.get('engagement_rate', 5) / 100)),
-            "campaigns_completed": len(creator.get('portfolio', [])),
-            "avg_engagement_rate": creator.get('engagement_rate', 0)
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/v1/campaigns", tags=["campaigns"])
-async def list_campaigns_simple(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
-    niche: str = Query(None),
-    status: str = Query(None),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """
-    List all campaigns with optional filtering
-    """
-    try:
-        filter_dict = {}
-        if niche:
-            filter_dict["niche"] = niche
-        if status:
-            filter_dict["status"] = status
-        
-        campaigns = await db.campaigns.find(filter_dict).skip(skip).limit(limit).to_list(length=limit)
-        
-        # Convert ObjectId to string
-        for campaign in campaigns:
-            campaign['_id'] = str(campaign.get('_id', ''))
-        
-        return campaigns
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/v1/campaigns/{campaign_id}", tags=["campaigns"])
-async def get_campaign_simple(
-    campaign_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """
-    Get campaign by ID
-    """
-    try:
-        try:
-            campaign_object_id = ObjectId(campaign_id)
-        except InvalidId:
-            raise HTTPException(status_code=400, detail="Invalid campaign id")
-
-        campaign = await db.campaigns.find_one({"_id": campaign_object_id})
-        if not campaign:
-            raise HTTPException(status_code=404, detail="Campaign not found")
-        
-        campaign['_id'] = str(campaign.get('_id', ''))
-        return campaign
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+app.include_router(campaigns.router, prefix="/api/v1")
+app.include_router(creators.router, prefix="/api/v1")
+app.include_router(brands.router, prefix="/api/v1")
+app.include_router(messages.router, prefix="/api/v1")
+app.include_router(plans.router, prefix="/api/v1")
+app.include_router(auth.router, prefix="/api/v1")
+app.include_router(applications.router, prefix="/api/v1")
+app.include_router(agreements.router, prefix="/api/v1")
+app.include_router(reviews.router, prefix="/api/v1")
+app.include_router(reports.router, prefix="/api/v1")
+app.include_router(blocks.router, prefix="/api/v1")
+app.include_router(subscriptions.router, prefix="/api/v1")
+app.include_router(analytics.router, prefix="/api/v1")
 
 # MARK: - Health Check Endpoints
 
@@ -361,7 +192,6 @@ async def shutdown_event():
 
 if __name__ == "__main__":
     import uvicorn
-    
     
     uvicorn.run(
         "main:app",
