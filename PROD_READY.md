@@ -7,9 +7,10 @@ This app is designed to be production-ready. Follow these steps to move from dev
 ### Environment Variables
 Modify `backend/.env` for production:
 - `ENV=production`
+- `PORT=8003`
 - `SECRET_KEY=generate-a-secure-random-key` (Use `openssl rand -hex 32`)
-- `MONGO_URL`: Point to your production MongoDB (e.g., Atlas).
-- `CORS_ORIGINS`: Restrict this to your Flutter Web domain or mobile app scheme.
+- `MONGO_URL`: `mongodb://admin:PASSWORD@YOUR_IP:27017/creator_bridge?authSource=admin`
+- `CORS_ORIGINS`: `https://creator-bridge.apex-logic.net`
 
 ### Deployment with Docker
 A `Dockerfile` and `docker-compose.yml` are provided. To deploy:
@@ -17,20 +18,23 @@ A `Dockerfile` and `docker-compose.yml` are provided. To deploy:
 docker-compose up --build -d
 ```
 
-### Security Checklist
-- [ ] Enable HTTPS on your server (use Nginx or Caddy with Let's Encrypt).
-- [ ] Change the default `password123` for seeded demo users immediately.
-- [ ] Implement rate limiting (e.g., using `slowapi` for FastAPI).
+### API Testing
+Run the automated test script to verify all endpoints are responding correctly:
+```bash
+cd backend
+python test_endpoints.py
+```
 
 ---
 
 ## 2. Flutter Frontend Production Setup
 
 ### API Configuration
-In `lib/providers/api_service.dart`, change `baseUrl` to your live API domain:
-```dart
-static const String baseUrl = 'https://api.yourdomain.com/api/v1';
-```
+The app is pre-configured to use:
+- `baseUrl`: `https://creator-bridge.apex-logic.net/api/v1`
+
+### GitHub Actions (iOS Build)
+A pipeline is configured in `.github/workflows/ios-build.yml`. Every push to `main` will trigger an automated iOS build to ensure compatibility.
 
 ### Build & Release
 #### Android
