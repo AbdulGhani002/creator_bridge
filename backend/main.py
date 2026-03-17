@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from contextlib import asynccontextmanager
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from dotenv import load_dotenv
 from bson import ObjectId
@@ -22,8 +22,6 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# MARK: - Database Configuration (uses Database utility)
 
 # MARK: - Application Lifespan
 
@@ -47,7 +45,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Configuration for mobile app
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -66,12 +64,16 @@ app.add_middleware(
 @app.middleware("http")
 async def logging_middleware(request: Request, call_next):
     """Log all requests"""
-    start_time = datetime.utcnow()
-    response = await call_next(request)
-    duration = (datetime.utcnow() - start_time).total_seconds()
+    start_time = datetime.now(timezone.utc)
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        logger.error(f"Middleware caught error: {e}")
+        raise e
+    duration = (datetime.now(timezone.utc) - start_time).total_seconds()
     logger.info(
         f"{request.method} {request.url.path} - "
-        f"Status: {response.status_code} - Duration: {duration:.2f}s"
+        f"Status: {response.status_code if 'response' in locals() else 500} - Duration: {duration:.2f}s"
     )
     return response
 
@@ -80,7 +82,7 @@ async def logging_middleware(request: Request, call_next):
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Handle HTTP exceptions"""
-    return JSONResponse(
+    response = JSONResponse(
         status_code=exc.status_code,
         content={
             "status": "error",
@@ -88,11 +90,13 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             "status_code": exc.status_code
         }
     )
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Handle validation errors"""
-    return JSONResponse(
+    response = JSONResponse(
         status_code=422,
         content={
             "status": "error",
@@ -100,22 +104,22 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "errors": [{"field": e["loc"][-1], "message": e["msg"]} for e in exc.errors()]
         }
     )
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     """Handle general exceptions"""
     logger.error(f"Unexpected error: {str(exc)}", exc_info=True)
-    return JSONResponse(
+    response = JSONResponse(
         status_code=500,
         content={
             "status": "error",
-            "message": "Internal server error"
+            "message": f"Internal server error: {str(exc)}"
         }
     )
-
-# MARK: - Dependency Injection
-
-# get_database dependency imported from database.py
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
 # MARK: - Route Registration
 
@@ -142,7 +146,7 @@ async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "database": "connected",
         "version": "1.0.0"
     }
@@ -158,8 +162,8 @@ async def root():
             "health": "/health",
             "docs": "/docs",
             "redoc": "/redoc",
-            "campaigns": "/campaigns",
-            "creators": "/creators"
+            "campaigns": "/api/v1/campaigns",
+            "creators": "/api/v1/creators"
         }
     }
 
@@ -180,25 +184,10 @@ async def api_v1_root():
         }
     }
 
-# MARK: - Application Startup/Shutdown Events
-
-@app.on_event("startup")
-async def startup_event():
-    """Run on application startup"""
-    logger.info("[STARTUP] CreatorBridge API starting up...")
-    logger.info(f"[ENV] Environment: {os.getenv('ENV', 'development')}")
-    logger.info(f"[DB] Database: {os.getenv('DATABASE_NAME', 'creator_bridge')}")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Run on application shutdown"""
-    logger.info("[SHUTDOWN] CreatorBridge API shutting down...")
-
 # MARK: - Application Entry Point
 
 if __name__ == "__main__":
     import uvicorn
-    
     uvicorn.run(
         "main:app",
         host=os.getenv("HOST", "0.0.0.0"),
