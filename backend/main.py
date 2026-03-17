@@ -14,7 +14,7 @@ from database import Database, get_database
 
 # Import routes
 from routes import campaigns, creators, brands, messages, plans
-from routes import auth, applications, agreements, reviews, reports, blocks, subscriptions, analytics
+from routes import auth, applications, agreements, reviews, reports, blocks, subscriptions, analytics, payments
 
 # Load environment variables
 load_dotenv()
@@ -128,6 +128,7 @@ app.include_router(reports.router, prefix="/api/v1")
 app.include_router(blocks.router, prefix="/api/v1")
 app.include_router(subscriptions.router, prefix="/api/v1")
 app.include_router(analytics.router, prefix="/api/v1")
+app.include_router(payments.router, prefix="/api/v1")
 
 # MARK: - Health Check Endpoints
 
