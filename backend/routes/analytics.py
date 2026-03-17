@@ -9,6 +9,16 @@ from security import get_current_user
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
+@router.get("/dashboard", response_model=dict)
+async def dashboard_analytics(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    if current_user.get("role") == "brand":
+        return await brand_analytics(current_user, db)
+    return await creator_analytics(current_user, db)
+
+
 @router.get("/creator/me", response_model=dict)
 async def creator_analytics(
     current_user: dict = Depends(get_current_user),

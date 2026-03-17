@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta, timezone
 import os
 import random
+import bcrypt
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,8 +35,15 @@ CAMPAIGN_IMAGES = [
 def get_now():
     return datetime.now(timezone.utc)
 
+def hash_password(password: str) -> str:
+    pwd_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
+
 def seed_data():
     """Populate database with realistic data"""
+    password_hash = hash_password("password123")
+    
     try:
         client = MongoClient(MONGODB_URL, serverSelectionTimeoutMS=5000)
         client.server_info()
@@ -93,7 +101,7 @@ def seed_data():
     alex_user = {
         "name": "Alex Rivera",
         "email": "alex@creatorbridge.com",
-        "password_hash": "$2b$12$6K8p2r4P7w4Y3U2I1O9P0eJ7F8G9H0I1J2K3L4M5N6O7P8Q9R0S1T", # "password123"
+        "password_hash": password_hash,
         "role": "creator",
         "location": "Dubai, UAE",
         "created_at": get_now(),
@@ -126,7 +134,7 @@ def seed_data():
     zenith_user = {
         "name": "Sarah Miller",
         "email": "sarah@zenith.com",
-        "password_hash": alex_user["password_hash"],
+        "password_hash": password_hash,
         "role": "brand",
         "location": "New York, USA",
         "created_at": get_now(),
@@ -236,4 +244,3 @@ def seed_data():
 
 if __name__ == "__main__":
     seed_data()
-

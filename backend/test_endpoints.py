@@ -68,6 +68,7 @@ def run_tests():
     
     # 6. Analytics
     test_endpoint("Dashboard Stats", "GET", "/analytics/dashboard", headers=headers)
+    test_endpoint("Creator Analytics", "GET", "/analytics/creator/me", headers=headers)
 
     print("-" * 60)
     print("🏁 Tests Completed.")
