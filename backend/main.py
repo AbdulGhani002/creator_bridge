@@ -51,8 +51,11 @@ app.add_middleware(
     allow_origins=[
         "https://creator-bridge.apex-logic.net",
         "http://localhost:3000",
+        "http://localhost:8000",
         "http://localhost:8003",
-        "*" 
+        "http://localhost:8080",
+        "http://localhost",
+        "null" 
     ],
     allow_credentials=True,
     allow_methods=["*"],

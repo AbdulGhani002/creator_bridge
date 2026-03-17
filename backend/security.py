@@ -1,42 +1,45 @@
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
+import bcrypt
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from passlib.context import CryptContext
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
 
-# Monkeypatch bcrypt for passlib compatibility
-import bcrypt
-if not hasattr(bcrypt, "__about__"):
-    bcrypt.__about__ = type('About', (object,), {'__version__': bcrypt.__version__})
-
 from database import get_database
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# We use the bcrypt library directly for maximum compatibility and to avoid Passlib's 72-byte check crash
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 def hash_password(password: str) -> str:
-    # Bcrypt has a 72-byte limit. Passlib usually handles this, 
-    # but we truncate just in case to avoid the ValueError seen in logs.
-    return pwd_context.hash(password[:72])
+    # Truncate to 72 bytes as per bcrypt specification
+    pwd_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password[:72], hashed_password)
+    try:
+        return bcrypt.checkpw(
+            plain_password.encode('utf-8')[:72],
+            hashed_password.encode('utf-8')
+        )
+    except Exception:
+        return False
 
 
 def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=30))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=1440))
     to_encode.update({"exp": expire})
     secret_key = os.getenv("SECRET_KEY", "change-me")
     algorithm = os.getenv("ALGORITHM", "HS256")
     return jwt.encode(to_encode, secret_key, algorithm=algorithm)
+
 
 
 async def get_current_user(
