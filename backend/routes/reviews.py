@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 from typing import Optional, Literal
-from datetime import datetime
+from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from database import get_database
@@ -58,7 +58,7 @@ async def create_review(
     review_doc = payload.dict()
     review_doc.update({
         "reviewer_id": current_user.get("id"),
-        "created_at": datetime.utcnow()
+        "created_at": datetime.now(timezone.utc)
     })
     result = await db.reviews.insert_one(review_doc)
 

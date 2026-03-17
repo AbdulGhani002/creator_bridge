@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional, Literal
-from datetime import datetime
+from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from database import get_database
@@ -42,14 +42,14 @@ async def save_ios_subscription(
     sub_doc.update({
         "user_id": current_user.get("id"),
         "platform": "ios",
-        "updated_at": datetime.utcnow()
+        "updated_at": datetime.now(timezone.utc)
     })
 
     existing = await db.subscriptions.find_one({"user_id": current_user.get("id")})
     if existing:
         await db.subscriptions.update_one({"_id": existing["_id"]}, {"$set": sub_doc})
     else:
-        sub_doc["created_at"] = datetime.utcnow()
+        sub_doc["created_at"] = datetime.now(timezone.utc)
         await db.subscriptions.insert_one(sub_doc)
 
     # Update creator profile tier if applicable

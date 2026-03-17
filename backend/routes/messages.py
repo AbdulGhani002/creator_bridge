@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
@@ -106,7 +106,7 @@ async def create_message(
             "thread_id": thread_id,
             "participants": [current_user.get("id"), message.to_id],
             "read_by": [current_user.get("id")],
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "read": False
         })
         message_id = await service.create_message(data)

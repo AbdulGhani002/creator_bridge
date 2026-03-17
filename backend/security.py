@@ -32,7 +32,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=30))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=30))
     to_encode.update({"exp": expire})
     secret_key = os.getenv("SECRET_KEY", "change-me")
     algorithm = os.getenv("ALGORITHM", "HS256")

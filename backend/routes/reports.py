@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Literal, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from database import get_database
@@ -31,7 +31,7 @@ async def create_report(
     report_doc.update({
         "reporter_id": current_user.get("id"),
         "status": "open",
-        "created_at": datetime.utcnow()
+        "created_at": datetime.now(timezone.utc)
     })
     result = await db.reports.insert_one(report_doc)
     return {"id": str(result.inserted_id), "status": "success", "message": "Report submitted"}
