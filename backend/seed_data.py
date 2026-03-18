@@ -17,19 +17,25 @@ CREATOR_IMAGES = [
     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
     "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
     "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=400&q=80"
 ]
 
 BRAND_IMAGES = [
     "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80", # Watch
     "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80", # Shoe
     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80", # Headphones
+    "https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=400&q=80", # Sports
+    "https://images.unsplash.com/photo-1526170315830-ef18a25d48a6?auto=format&fit=crop&w=400&q=80" # Camera
 ]
 
 CAMPAIGN_IMAGES = [
     "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80", # Villa
     "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=800&q=80", # Fashion
     "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80", # Tech
+    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80", # Travel
+    "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&q=80"  # Fitness
 ]
 
 def get_now():
@@ -41,7 +47,7 @@ def hash_password(password: str) -> str:
     return bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
 
 def seed_data():
-    """Populate database with realistic data"""
+    """Populate database with realistic production-ready data"""
     password_hash = hash_password("password123")
     
     try:
@@ -55,13 +61,13 @@ def seed_data():
 
     print("[*] Starting data seeding...")
     
-    # Drop collections to clear documents AND indexes
-    collections = ["users", "campaigns", "creators", "brands", "messages", "plans", "applications", "agreements", "subscriptions"]
+    # Drop collections
+    collections = ["users", "campaigns", "creators", "brands", "messages", "plans", "applications", "agreements", "subscriptions", "analytics"]
     for coll in collections:
         db[coll].drop()
-    print("[*] Dropped existing collections (cleared data & indexes)")
+    print("[*] Dropped existing collections")
 
-    # 1. Seed Subscription Plans (Crucial for App Logic)
+    # 1. Seed Subscription Plans
     print("[*] Seeding subscription plans...")
     plans_data = [
         {
@@ -97,135 +103,233 @@ def seed_data():
     # 2. Seed Users & Profiles
     print("[*] Seeding users, creators, and brands...")
     
-    # Demo Creator: Alex Rivera
-    alex_user = {
-        "name": "Alex Rivera",
-        "email": "alex@creatorbridge.com",
-        "password_hash": password_hash,
-        "role": "creator",
-        "location": "Dubai, UAE",
-        "created_at": get_now(),
-        "is_active": True
-    }
-    alex_id = str(db.users.insert_one(alex_user).inserted_id)
-    
-    db.creators.insert_one({
-        "user_id": alex_id,
-        "name": "Alex Rivera",
-        "bio": "Travel enthusiast, luxury lifestyle and real estate content creator based in Dubai. Passionate about showcasing the finest properties and extraordinary experiences.",
-        "niche": "real_estate",
-        "location": "Dubai, UAE",
-        "followers_count": 365400,
-        "verified": True,
-        "profile_image_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuCNAa9YiUXjQFIETGCjd7Pr1DvWbIT8jBxV8rIrBvKE-X86nTfyoZ9vZ-GVd8Owy4RuA-xy1jLH-MihBjC3qjZhRMXl9e4QvDP_MouuFb6Ey9kyBLH4gENd9JETThw-0CLBtwL9f6aq5dwMuZ-FGhobrTwiMqBdnfZRnCjlUT7CTV-WnkWXCLsgVuwSiew28ypbEIVgUa7ngSLezg_lG8tUhIuwd0-i-ccTuvxVMhyXo7ed3rdQPFftQLx3reJzKeTosWKFITirQgk",
-        "portfolio_url": "https://creatorbridge.com/alex-rivera",
-        "subscription_tier": "pro",
-        "pricing_per_post": 1200,
-        "total_earnings": 15450.0,
-        "rating": 4.9,
-        "social_platforms": [
-            {"platform": "instagram", "handle": "alex_rivera", "followers": 125000, "engagement_rate": 8.5},
-            {"platform": "tiktok", "handle": "alex_rivera_vlogs", "followers": 240400, "engagement_rate": 12.2}
-        ],
-        "created_at": get_now()
-    })
+    # --- CREATORS ---
+    creators_list = [
+        {
+            "name": "Alex Rivera",
+            "email": "alex@creatorbridge.com",
+            "bio": "Travel enthusiast, luxury lifestyle and real estate content creator based in Dubai.",
+            "niche": "real_estate",
+            "location": "Dubai, UAE",
+            "followers": 365400,
+            "image": CREATOR_IMAGES[0],
+            "price": 1200,
+            "earnings": 15450,
+            "rating": 4.9
+        },
+        {
+            "name": "Sarah Chen",
+            "email": "sarah.c@creators.net",
+            "bio": "Tech reviewer and gadget enthusiast. I break down complex tech into simple lifestyle benefits.",
+            "niche": "tech",
+            "location": "San Francisco, USA",
+            "followers": 850000,
+            "image": CREATOR_IMAGES[2],
+            "price": 2500,
+            "earnings": 42000,
+            "rating": 5.0
+        },
+        {
+            "name": "Marcus Thorne",
+            "email": "marcus.fitness@gmail.com",
+            "bio": "Certified personal trainer and nutrition coach. Helping you build a sustainable healthy lifestyle.",
+            "niche": "fitness",
+            "location": "London, UK",
+            "followers": 120000,
+            "image": CREATOR_IMAGES[1],
+            "price": 800,
+            "earnings": 8900,
+            "rating": 4.7
+        },
+        {
+            "name": "Elena Rossi",
+            "email": "elena.style@outlook.com",
+            "bio": "High fashion and sustainable living. Bridging the gap between luxury and conscious consumption.",
+            "niche": "fashion",
+            "location": "Milan, Italy",
+            "followers": 540000,
+            "image": CREATOR_IMAGES[4],
+            "price": 1800,
+            "earnings": 28500,
+            "rating": 4.8
+        },
+        {
+            "name": "David Park",
+            "email": "david.vlogs@youtube.com",
+            "bio": "Daily vlogger exploring hidden gems in Asian cities. Focus on food and local culture.",
+            "niche": "travel",
+            "location": "Seoul, South Korea",
+            "followers": 2100000,
+            "image": CREATOR_IMAGES[3],
+            "price": 5000,
+            "earnings": 120000,
+            "rating": 4.9
+        }
+    ]
 
-    # Demo Brand: Zenith Agency
-    zenith_user = {
-        "name": "Sarah Miller",
-        "email": "sarah@zenith.com",
-        "password_hash": password_hash,
-        "role": "brand",
-        "location": "New York, USA",
-        "created_at": get_now(),
-        "is_active": True
-    }
-    zenith_user_id = str(db.users.insert_one(zenith_user).inserted_id)
-    
-    db.brands.insert_one({
-        "user_id": zenith_user_id,
-        "company_name": "Zenith Agency",
-        "industry": "Fashion & Lifestyle",
-        "company_website": "https://zenith.com",
-        "company_description": "Zenith is a premium lifestyle and fashion brand focused on sustainable and high-quality apparel. We collaborate with creators who share our vision of modern elegance and conscious living.",
-        "verified": True,
-        "location": "New York, USA",
-        "created_at": get_now()
-    })
+    creator_ids = []
+    for c in creators_list:
+        u_id = str(db.users.insert_one({
+            "name": c["name"],
+            "email": c["email"],
+            "password_hash": password_hash,
+            "role": "creator",
+            "location": c["location"],
+            "created_at": get_now(),
+            "is_active": True
+        }).inserted_id)
+        
+        db.creators.insert_one({
+            "user_id": u_id,
+            "name": c["name"],
+            "bio": c["bio"],
+            "niche": c["niche"],
+            "location": c["location"],
+            "followers_count": c["followers"],
+            "verified": True,
+            "profile_image_url": c["image"],
+            "subscription_tier": "pro" if c["followers"] < 1000000 else "premium",
+            "pricing_per_post": c["price"],
+            "total_earnings": c["earnings"],
+            "rating": c["rating"],
+            "social_platforms": [
+                {"platform": "instagram", "handle": c["name"].lower().replace(" ", "_"), "followers": c["followers"] // 2},
+                {"platform": "tiktok", "handle": c["name"].lower().replace(" ", ""), "followers": c["followers"] // 2}
+            ],
+            "created_at": get_now()
+        })
+        creator_ids.append(u_id)
+
+    # --- BRANDS ---
+    brands_list = [
+        {
+            "name": "Sarah Miller",
+            "email": "sarah@zenith.com",
+            "company": "Zenith Agency",
+            "industry": "Fashion & Lifestyle",
+            "desc": "Premium lifestyle and fashion brand focused on sustainable and high-quality apparel."
+        },
+        {
+            "name": "Tom Baker",
+            "email": "tom@lumina.tech",
+            "company": "Lumina Tech",
+            "industry": "Consumer Electronics",
+            "desc": "Innovative home automation and personal tech products for the modern professional."
+        },
+        {
+            "name": "Jessica Low",
+            "email": "jessica@fitfuel.com",
+            "company": "FitFuel Nutrition",
+            "industry": "Health & Wellness",
+            "desc": "Science-backed supplements and organic nutrition for athletes and active individuals."
+        }
+    ]
+
+    brand_ids = []
+    for b in brands_list:
+        u_id = str(db.users.insert_one({
+            "name": b["name"],
+            "email": b["email"],
+            "password_hash": password_hash,
+            "role": "brand",
+            "location": "Various",
+            "created_at": get_now(),
+            "is_active": True
+        }).inserted_id)
+        
+        db.brands.insert_one({
+            "user_id": u_id,
+            "company_name": b["company"],
+            "industry": b["industry"],
+            "company_website": f"https://{b['company'].lower().replace(' ', '')}.com",
+            "company_description": b["desc"],
+            "verified": True,
+            "location": "Global",
+            "created_at": get_now()
+        })
+        brand_ids.append(u_id)
 
     # 3. Seed Campaigns
     print("[*] Seeding campaigns...")
-    campaigns = [
+    campaigns_data = [
         {
-            "brand_id": zenith_user_id,
+            "brand_id": brand_ids[0],
             "title": "Luxury Villa Showcase 2026",
-            "description": "Highlight the premium amenities and breathtaking views of the new Azure heights project in Dubai Marina.",
+            "description": "Highlight the premium amenities of the new Azure heights project in Dubai Marina.",
             "niche": "real_estate",
             "budget": 5000,
-            "location": "Dubai, UAE",
-            "required_followers": 50000,
-            "deliverables": "3 Reels, 5 Stories, 1 Grid Post",
-            "deadline": get_now() + timedelta(days=20),
-            "status": "open",
-            "applications_count": 12,
-            "image_url": CAMPAIGN_IMAGES[0],
-            "created_at": get_now()
+            "image": CAMPAIGN_IMAGES[0]
         },
         {
-            "brand_id": zenith_user_id,
+            "brand_id": brand_ids[0],
             "title": "Sustainable Sneaker Launch",
             "description": "Create authentic unboxing and lifestyle content for our new recycled materials sneaker line.",
             "niche": "fashion",
             "budget": 3500,
-            "location": "Global",
-            "required_followers": 25000,
-            "deliverables": "2 Reels, 1 YouTube Short",
-            "deadline": get_now() + timedelta(days=15),
-            "status": "open",
-            "applications_count": 8,
-            "image_url": CAMPAIGN_IMAGES[1],
-            "created_at": get_now()
+            "image": CAMPAIGN_IMAGES[1]
         },
         {
-            "brand_id": zenith_user_id,
+            "brand_id": brand_ids[1],
             "title": "NextGen Smartphone Review",
             "description": "Unboxing and feature walkthrough for the upcoming flagship device. Focus on camera quality.",
             "niche": "tech",
             "budget": 7500,
-            "location": "USA / Europe",
-            "required_followers": 100000,
-            "deliverables": "1 Long-form Video, 3 Shorts",
-            "deadline": get_now() + timedelta(days=10),
-            "status": "open",
-            "applications_count": 5,
-            "image_url": CAMPAIGN_IMAGES[2],
-            "created_at": get_now()
+            "image": CAMPAIGN_IMAGES[2]
+        },
+        {
+            "brand_id": brand_ids[1],
+            "title": "Smart Home Integration Series",
+            "description": "Showcase how Lumina products make daily life easier and more connected.",
+            "niche": "tech",
+            "budget": 4200,
+            "image": CAMPAIGN_IMAGES[2]
+        },
+        {
+            "brand_id": brand_ids[2],
+            "title": "Summer Fitness Challenge",
+            "description": "Join our 30-day transformation challenge and promote our new electrolyte range.",
+            "niche": "fitness",
+            "budget": 2800,
+            "image": CAMPAIGN_IMAGES[4]
+        },
+        {
+            "brand_id": brand_ids[2],
+            "title": "Hidden Gems Travel Vlog",
+            "description": "We are looking for travel creators to visit our retreat centers in Bali and Costa Rica.",
+            "niche": "travel",
+            "budget": 6000,
+            "image": CAMPAIGN_IMAGES[3]
         }
     ]
-    db.campaigns.insert_many(campaigns)
+    
+    for c in campaigns_data:
+        db.campaigns.insert_one({
+            "brand_id": c["brand_id"],
+            "title": c["title"],
+            "description": c["description"],
+            "niche": c["niche"],
+            "budget": c["budget"],
+            "location": "Global",
+            "required_followers": 25000,
+            "deliverables": "Reels, Stories, and Grid Posts",
+            "deadline": get_now() + timedelta(days=30),
+            "status": "open",
+            "applications_count": random.randint(3, 15),
+            "image_url": c["image"],
+            "created_at": get_now()
+        })
 
     # 4. Seed Messages
     print("[*] Seeding messages...")
     db.messages.insert_one({
-        "from_id": zenith_user_id,
-        "to_id": alex_id,
-        "participants": [zenith_user_id, alex_id],
-        "thread_id": f"{min(zenith_user_id, alex_id)}_{max(zenith_user_id, alex_id)}_general",
+        "from_id": brand_ids[0],
+        "to_id": creator_ids[0],
+        "participants": [brand_ids[0], creator_ids[0]],
+        "thread_id": f"{min(brand_ids[0], creator_ids[0])}_{max(brand_ids[0], creator_ids[0])}_general",
         "content": "Hi Alex! We loved your recent Dubai tour. Are you available for our Azure Heights campaign next month?",
         "timestamp": get_now() - timedelta(hours=2),
         "read": True,
-        "read_by": [zenith_user_id, alex_id]
-    })
-    
-    db.messages.insert_one({
-        "from_id": alex_id,
-        "to_id": zenith_user_id,
-        "participants": [zenith_user_id, alex_id],
-        "thread_id": f"{min(zenith_user_id, alex_id)}_{max(zenith_user_id, alex_id)}_general",
-        "content": "The draft looks perfect! We're ready to proceed with the second phase of the campaign.",
-        "timestamp": get_now() - timedelta(minutes=2),
-        "read": False,
-        "read_by": [alex_id]
+        "read_by": [brand_ids[0], creator_ids[0]]
     })
 
     # 5. Create Indexes
@@ -238,9 +342,11 @@ def seed_data():
     db.messages.create_index("thread_id")
     
     client.close()
-    print("\n[SUCCESS] Production-ready data seeded successfully!")
-    print("User: alex@creatorbridge.com / password123")
-    print("User: sarah@zenith.com / password123")
+    print("\n[SUCCESS] Realistic production-ready data seeded successfully!")
+    print(f"Total Creators: {len(creator_ids)}")
+    print(f"Total Brands: {len(brand_ids)}")
+    print(f"Total Campaigns: {len(campaigns_data)}")
+    print("\nPrimary Admin Login: alex@creatorbridge.com / password123")
 
 if __name__ == "__main__":
     seed_data()

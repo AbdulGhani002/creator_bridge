@@ -38,9 +38,10 @@ def run_tests():
     test_endpoint("Health Check", "GET", "/health")
     
     # 2. Auth: Signup
+    test_email = f"test_prod_{os.getpid()}@apex-logic.net"
     signup_data = {
         "name": "Test User",
-        "email": f"test_prod_{os.getpid()}@apex-logic.net",
+        "email": test_email,
         "password": "password123",
         "role": "creator",
         "location": "Test City"
@@ -49,7 +50,7 @@ def run_tests():
     
     # 3. Auth: Login
     login_data = {
-        "email": "alex@creatorbridge.com", # Using seeded user
+        "email": test_email,
         "password": "password123"
     }
     login_res = test_endpoint("Login", "POST", "/auth/login", login_data)

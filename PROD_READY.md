@@ -25,6 +25,13 @@ cd backend
 python test_endpoints.py
 ```
 
+### Production Checklist
+- [x] **Password Hashing:** Fixed Decisive Bcrypt/Passlib compatibility crash.
+- [x] **CORS Robustness:** Hardcoded production domain and common dev ports.
+- [x] **Error Resiliency:** Guaranteed CORS headers even on 500 Internal Server errors.
+- [ ] **HTTPS:** Ensure your reverse proxy (Nginx/PM2) handles SSL via Let's Encrypt.
+- [ ] **Secrets:** Rotate the `SECRET_KEY` in your VPS `.env` file.
+
 ---
 
 ## 2. Flutter Frontend Production Setup
@@ -32,6 +39,21 @@ python test_endpoints.py
 ### API Configuration
 The app is pre-configured to use:
 - `baseUrl`: `https://creator-bridge.apex-logic.net/api/v1`
+
+### Google Maps Setup
+1.  Obtain an API Key from [Google Cloud Console](https://console.cloud.google.com/).
+2.  **Android:** Add the key to `android/app/src/main/AndroidManifest.xml`:
+    ```xml
+    <meta-data android:name="com.google.android.geo.API_KEY" android:value="YOUR_KEY_HERE"/>
+    ```
+3.  **iOS:** Add the key to `ios/Runner/AppDelegate.swift`:
+    ```swift
+    GMSServices.provideAPIKey("YOUR_KEY_HERE")
+    ```
+4.  **Web:** Add the key to `web/index.html`:
+    ```html
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>
+    ```
 
 ### GitHub Actions (iOS Build)
 A pipeline is configured in `.github/workflows/ios-build.yml`. Every push to `main` will trigger an automated iOS build to ensure compatibility.
