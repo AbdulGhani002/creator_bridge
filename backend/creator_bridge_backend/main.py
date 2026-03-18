@@ -511,3 +511,62 @@ async def search_creators(
         del c["password"] # Security ke liye password remove karein
         
     return creators
+
+# 🚀 STRIPE WEBHOOK ENDPOINT
+@app.post("/api/stripe/webhook")
+async def stripe_webhook(request: Request):
+    # 1. Stripe hamesha raw body mangta hai signature verify karne ke liye
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+    # Agar secret .env mein nahi hai toh error de
+    if not endpoint_secret:
+        print("❌ ERROR: STRIPE_WEBHOOK_SECRET .env file mein nahi mili!")
+        raise HTTPException(status_code=500, detail="Webhook secret missing")
+
+    event = None
+
+    try:
+        # 2. Stripe ki taraf se aane wale data ko verify karna
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        print(f"⚠️ Webhook Error (Invalid Payload): {e}")
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError as e:
+        print(f"⚠️ Webhook Error (Invalid Signature): {e}")
+        raise HTTPException(status_code=400, detail="Invalid signature")
+    except Exception as e:
+        print(f"⚠️ Webhook Error (Unknown): {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # 3. Agar payment successful ho gayi hai
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        
+        # Jo metadata humne Flutter se bheja tha, wo yahan se wapas nikalna
+        metadata = session.get("metadata", {})
+        user_id = metadata.get("user_id")
+        plan_type = metadata.get("plan_type")
+
+        if user_id:
+            try:
+                # 🚀 Database mein user ka plan update karna
+                await db["users"].update_one(
+                    {"_id": ObjectId(user_id)},
+                    {"$set": {
+                        "plan": plan_type, 
+                        "is_premium": True,
+                        "updated_at": datetime.utcnow()
+                    }}
+                )
+                print(f"✅ SUCCESS: User {user_id} successfully upgraded to {plan_type}!")
+            except Exception as db_error:
+                print(f"❌ Database Update Error: {db_error}")
+        else:
+            print("⚠️ ERROR: Stripe session mein user_id nahi mila!")
+
+    # Stripe ko 200 OK wapas bhejna taake wo dobara try na kare
+    return {"status": "success"}
