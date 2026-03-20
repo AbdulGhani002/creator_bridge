@@ -10,7 +10,8 @@ from bson import ObjectId
 from datetime import datetime
 import stripe # Top par lazmi hona chahiye
 from fastapi import Request
-
+from bson.objectid import ObjectId # 👈 Ensure ye import top par ho ya function mein ho
+from fastapi import Query
 load_dotenv()
 
 app = FastAPI()
@@ -216,42 +217,81 @@ async def get_chat_history(user1_id: str, user2_id: str):
             m["timestamp"] = m["timestamp"].isoformat()
     return messages
 
+
 @app.get("/api/chat-list/{user_id}")
 async def get_chat_list(user_id: str):
-    pipeline = [
-        {"$match": {"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}},
-        {"$sort": {"timestamp": -1}},
-        {
-            "$group": {
-                "_id": {
-                    "$cond": [{"$eq": ["$sender_id", user_id]}, "$receiver_id", "$sender_id"]
-                },
-                "last_message": {"$first": "$text"},
-                "timestamp": {"$first": "$timestamp"}
-            }
-        },
-        {"$addFields": {"other_user_obj_id": {"$toObjectId": "$_id"}}},
-        {
-            "$lookup": {
-                "from": "users",
-                "localField": "other_user_obj_id",
-                "foreignField": "_id",
-                "as": "user_details"
-            }
-        },
-        {"$unwind": "$user_details"}
-    ]
-    results = await db["messages"].aggregate(pipeline).to_list(100)
-    formatted_list = []
-    for r in results:
-        formatted_list.append({
-            "other_user_id": str(r["_id"]),
-            "other_user_name": r["user_details"].get("name", "Unknown"),
-            "last_message": r["last_message"],
-            "timestamp": r["timestamp"].isoformat() if r["timestamp"] else ""
-        })
-    return formatted_list
+    try:
+        # 1. Safai: Agar ID ke sath koi extra space aa gaya ho toh use hata dein
+        clean_user_id = user_id.strip()
+        
+        # 🚀 DEBUG PRINT: Ye Ghani ko terminal mein asli messages dikhayega
+        test_msgs = await db["messages"].find().to_list(3)
+        print(f"\n--- DEBUG RAW MESSAGES FROM DB ---")
+        print(test_msgs)
+        print(f"----------------------------------\n")
 
+        # 🚀 STEP 1: Blanket Query - (sender_id aur senderId DONO ko dhoondo)
+        query_conditions = [
+            {"sender_id": clean_user_id}, 
+            {"receiver_id": clean_user_id},
+            {"senderId": clean_user_id},   # 👈 Backup for camelCase
+            {"receiverId": clean_user_id}  # 👈 Backup for camelCase
+        ]
+        
+        if len(clean_user_id) == 24:
+            try:
+                obj_id = ObjectId(clean_user_id)
+                query_conditions.extend([
+                    {"sender_id": obj_id}, {"receiver_id": obj_id},
+                    {"senderId": obj_id}, {"receiverId": obj_id}
+                ])
+            except:
+                pass
+
+        query = {"$or": query_conditions}
+        
+        # Messages uthayen
+        cursor = db["messages"].find(query).sort("timestamp", -1)
+        messages = await cursor.to_list(length=200)
+        
+        print(f"DEBUG: Found {len(messages)} messages for user {clean_user_id}")
+
+        # 🚀 STEP 2: Python Grouping
+        chats_dict = {}
+        
+        for msg in messages:
+            # Dono formats ko handle karein (snake_case aur camelCase)
+            sender_str = str(msg.get("sender_id", msg.get("senderId")))
+            receiver_str = str(msg.get("receiver_id", msg.get("receiverId")))
+            
+            other_user_id = receiver_str if sender_str == clean_user_id else sender_str
+            
+            if other_user_id not in chats_dict and other_user_id != "None":
+                other_user_name = "User Not Found"
+                try:
+                    # Naam dhoondein
+                    other_user = await db["users"].find_one({"_id": ObjectId(other_user_id)})
+                    if not other_user: 
+                        other_user = await db["users"].find_one({"_id": other_user_id})
+                        
+                    if other_user:
+                        other_user_name = other_user.get("name", other_user.get("full_name", "Unknown"))
+                except:
+                    pass
+                
+                chats_dict[other_user_id] = {
+                    "other_user_id": other_user_id,
+                    "other_user_name": other_user_name,
+                    "last_message": msg.get("text", ""),
+                    "timestamp": msg.get("timestamp").isoformat() if msg.get("timestamp") else ""
+                }
+                
+        return list(chats_dict.values())
+
+    except Exception as e:
+        print(f"Chat List Error: {e}")
+        return {"error": str(e)}
+    
 # 2. POST Endpoint: Campaign save karne ke liye
 @app.post("/api/campaigns")
 async def create_campaign(campaign: CampaignCreate):
@@ -266,26 +306,40 @@ async def create_campaign(campaign: CampaignCreate):
 
 # 3. GET Endpoint: Saari campaigns fetch karne ke liye (For Creators)
 @app.get("/api/campaigns")
-async def get_campaigns(creator_id: Optional[str] = None): # 👈 Optional creator_id add kiya
+async def get_campaigns(
+    creator_id: Optional[str] = None, 
+    brand_id: Optional[str] = None  # 👈 Flutter se ye ID aayegi filtering ke liye
+):
     try:
-        cursor = db.campaigns.find().sort("_id", -1) # Latest campaigns pehle
+        # 🚀 STEP 1: Pehle khali query banayein (Default: Find ALL)
+        query = {}
+
+        # 🚀 STEP 2: Agar Brand ne request ki hai, toh sirf uski ID filter karein
+        if brand_id:
+            query["brand_id"] = brand_id
+
+        # 🚀 STEP 3: MongoDB se data nikalen (Filtered ya All)
+        cursor = db.campaigns.find(query).sort("_id", -1) 
         campaigns = await cursor.to_list(length=100)
         
+        # 🚀 STEP 4: Application status check karna (For Creators)
         for c in campaigns:
             c["_id"] = str(c["_id"])
-            c["application_status"] = None # Default value (yani apply nahi kiya)
+            c["application_status"] = None # Default value
             
-            # Agar Flutter ne creator_id bheja hai, toh uska status check karo
+            # Agar Flutter ne creator_id bheja hai, toh check karo usne apply kiya ya nahi
             if creator_id:
                 application = await db.applications.find_one({
                     "campaign_id": c["_id"],
                     "creator_id": creator_id
                 })
                 if application:
-                    c["application_status"] = application.get("status") # pending, accepted, ya declined
+                    # pending, accepted, ya declined status return karega
+                    c["application_status"] = application.get("status")
                     
         return campaigns
     except Exception as e:
+        print(f"Error in get_campaigns: {e}")
         return {"error": str(e)}
 
 from bson import ObjectId
@@ -318,21 +372,52 @@ async def update_application_status(app_id: str, payload: StatusUpdate):
     except Exception as e:
         return {"error": str(e)}
 
+from typing import Optional
+
 @app.get("/api/creators/search")
-async def search_creators(niche: str = None, location: str = None):
-    query = {"role": "creator"} # Sirf creators ko dhoondna hai
-    
-    if niche and niche != "All":
-        query["niche"] = niche
-    if location:
-        # Case-insensitive search ke liye regex use kar rahe hain
-        query["location"] = {"$regex": location, "$options": "i"}
+async def search_creators(
+    niche: Optional[str] = None, 
+    location: Optional[str] = None,
+    min_followers: Optional[int] = None, # 👈 Naya (Optional)
+    max_followers: Optional[int] = None  # 👈 Naya (Optional)
+):
+    try:
+        query = {"role": "creator"} # Sirf creators ko dhoondna hai
         
-    cursor = db["users"].find(query)
-    creators = await cursor.to_list(100)
-    for c in creators:
-        c["_id"] = str(c["_id"])
-    return creators
+        # 🟢 1. Purana Niche Filter (Safe)
+        if niche and niche != "All":
+            query["niche"] = niche
+            
+        # 🟢 2. Purana Location Filter (Safe)
+        if location:
+            # Case-insensitive search ke liye regex
+            query["location"] = {"$regex": location, "$options": "i"}
+            
+        # 🚀 3. NAYA Follower Range Filter
+        # Ye sirf tab chalega jab Flutter se follower ki limit bheji jayegi
+        if min_followers is not None or max_followers is not None:
+            follower_query = {}
+            if min_followers is not None:
+                follower_query["$gte"] = min_followers
+            if max_followers is not None:
+                follower_query["$lte"] = max_followers
+            
+            if follower_query:
+                query["followers"] = follower_query
+
+        # Database Query Execute Karein
+        # .sort("followers", -1) add kar diya taake highest followers wale pehle aayen
+        cursor = db["users"].find(query).sort("followers", -1)
+        creators = await cursor.to_list(100)
+        
+        for c in creators:
+            c["_id"] = str(c["_id"])
+            
+        return creators
+
+    except Exception as e:
+        print(f"Search API Error: {e}")
+        return []
 
 @app.put("/api/users/upgrade-plan")
 async def upgrade_plan(data: dict):
@@ -570,3 +655,33 @@ async def stripe_webhook(request: Request):
 
     # Stripe ko 200 OK wapas bhejna taake wo dobara try na kare
     return {"status": "success"}
+
+@app.put("/api/users/update-profile/{user_id}")
+async def update_profile(user_id: str, request: Request):
+    try:
+        data = await request.json()
+        update_data = {}
+
+        # 🚀 Field Mapping (Ensure fields match exactly)
+        if "full_name" in data: update_data["full_name"] = data["full_name"]
+        if "name" in data: update_data["name"] = data["name"] # Fallback
+        if "niche" in data: update_data["niche"] = data["niche"]
+        
+        # 🚀 Followers MUST be an integer!
+        if "followers" in data: 
+            update_data["followers"] = int(data["followers"]) 
+            
+        if "rate" in data: update_data["rate"] = data["rate"]
+        if "location" in data: update_data["location"] = data["location"]
+        if "bio" in data: update_data["bio"] = data["bio"]
+        if "social_link" in data: update_data["social_link"] = data["social_link"]
+
+        # 🚀 ObjectId ka check
+        query = {"_id": ObjectId(user_id)} if len(user_id) == 24 else {"_id": user_id}
+
+        result = await db["users"].update_one(query, {"$set": update_data})
+        
+        return {"success": True, "message": "Profile updated!"}
+    except Exception as e:
+        print(f"Update Profile Error: {e}")
+        return {"success": False, "error": str(e)}
